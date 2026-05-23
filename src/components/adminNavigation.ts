@@ -1,0 +1,32 @@
+export const adminNavigation = [
+  {
+    label: "Dashboard",
+    href: "/admin",
+    title: "Dashboard Admin",
+    subtitle: "Ringkasan pengelolaan website desa",
+  },
+  {
+    label: "Berita",
+    href: "/admin/berita",
+    title: "Kelola Berita",
+    subtitle: "Atur berita dan pengumuman desa",
+  },
+  {
+    label: "Galeri",
+    href: "/admin/galeri",
+    title: "Kelola Galeri",
+    subtitle: "Dokumentasi foto dan album kegiatan",
+  },
+  {
+    label: "Profil",
+    href: "/admin/profil",
+    title: "Kelola Profil",
+    subtitle: "Informasi profil dan identitas desa",
+  },
+  {
+    label: "UMKM",
+    href: "/admin/umkm",
+    title: "Kelola UMKM",
+    subtitle: "Data usaha dan produk warga desa",
+  },
+] as const;

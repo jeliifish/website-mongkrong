@@ -1,0 +1,228 @@
+"use client";
+
+import { useState } from "react";
+
+import Button from "@/components/Button";
+import SearchBar from "@/components/SearchBar";
+
+import AddGaleriModal from "./AddGaleriModal";
+import DeleteGaleriModal from "./DeleteGaleriModal";
+import DetailGaleriModal from "./DetailGaleriModal";
+import EditGaleriModal from "./EditGaleriModal";
+
+type AlbumItem = {
+  id: string;
+  title: string;
+  photos: string;
+  updated: string;
+  imageUrl?: string;
+  fileName?: string;
+};
+
+type GaleriSectionProps = {
+  items: AlbumItem[];
+};
+
+const todayFormatter = new Intl.DateTimeFormat("id-ID", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+export default function GaleriSection({ items }: GaleriSectionProps) {
+  const [albums, setAlbums] = useState(items);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isAddingGaleri, setIsAddingGaleri] = useState(false);
+  const [selectedGaleri, setSelectedGaleri] = useState<AlbumItem | null>(null);
+  const [editingGaleri, setEditingGaleri] = useState<AlbumItem | null>(null);
+  const [deletingGaleri, setDeletingGaleri] = useState<AlbumItem | null>(null);
+  const filteredAlbums = albums.filter((album) =>
+    album.title.toLowerCase().includes(searchQuery.trim().toLowerCase()),
+  );
+
+  const handleAddGaleri = ({
+    title,
+    file,
+  }: {
+    title: string;
+    file: File;
+  }) => {
+    const imageUrl = URL.createObjectURL(file);
+
+    setAlbums((current) => [
+      {
+        id: `galeri-${Date.now()}`,
+        title,
+        photos: "1 foto",
+        updated: todayFormatter.format(new Date()),
+        imageUrl,
+        fileName: file.name,
+      },
+      ...current,
+    ]);
+  };
+
+  const handleEditGaleri = ({
+    id,
+    title,
+    file,
+  }: {
+    id: string;
+    title: string;
+    file?: File | null;
+  }) => {
+    setAlbums((current) =>
+      current.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              title,
+              updated: todayFormatter.format(new Date()),
+              imageUrl: file ? URL.createObjectURL(file) : item.imageUrl,
+              fileName: file ? file.name : item.fileName,
+            }
+          : item,
+      ),
+    );
+  };
+
+  const handleDeleteGaleri = (id: string) => {
+    setAlbums((current) => current.filter((item) => item.id !== id));
+    setSelectedGaleri((current) => (current?.id === id ? null : current));
+    setEditingGaleri((current) => (current?.id === id ? null : current));
+  };
+
+  return (
+    <>
+      <div className="grid gap-3 border-b border-zinc-200 pb-6 xl:grid-cols-[minmax(0,1fr)_16rem] xl:items-center">
+        <SearchBar
+          placeholder="Cari judul galeri"
+          className="w-full max-w-2xl"
+          value={searchQuery}
+          onChange={setSearchQuery}
+        />
+        <div className="w-full sm:w-[16rem] xl:justify-self-end">
+          <Button fullWidth onClick={() => setIsAddingGaleri(true)} className="gap-3">
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 5v14" />
+              <path d="M5 12h14" />
+            </svg>
+            <span>Tambah Foto</span>
+          </Button>
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-4 md:grid-cols-3">
+        {filteredAlbums.map((album, index) => (
+          <article
+            key={album.id}
+            className="group relative overflow-hidden rounded-[2rem] border border-zinc-200 bg-white shadow-[0_12px_36px_rgba(15,23,42,0.05)] transition hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(15,23,42,0.08)]"
+          >
+            <button
+              type="button"
+              onClick={() => setSelectedGaleri(album)}
+              className="block w-full text-left"
+            >
+              <div
+                className="flex min-h-44 items-end bg-[linear-gradient(180deg,#d7e5d8_0%,#96c498_100%)] bg-cover bg-center p-5"
+                style={album.imageUrl ? { backgroundImage: `url(${album.imageUrl})` } : undefined}
+              >
+                <span className="rounded-full bg-white/85 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
+                  Galeri {String(index + 1).padStart(2, "0")}
+                </span>
+              </div>
+              <div className="p-5">
+                <p className="text-lg font-semibold text-zinc-900">{album.title}</p>
+                <p className="mt-2 text-sm text-zinc-500">{album.photos}</p>
+                <p className="mt-1 text-sm text-zinc-500">Update: {album.updated}</p>
+              </div>
+            </button>
+
+            <details className="group/details absolute right-4 top-4 z-10">
+              <summary className="flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-full bg-white/92 text-zinc-500 shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition hover:text-zinc-900">
+                <span className="sr-only">Buka aksi galeri</span>
+                <span className="flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                </span>
+              </summary>
+
+              <div className="absolute right-0 top-12 min-w-40 overflow-hidden border border-zinc-200 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.12)]">
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.currentTarget.closest("details")?.removeAttribute("open");
+                    setSelectedGaleri(album);
+                  }}
+                  className="block w-full px-4 py-3 text-left text-sm text-zinc-700 transition hover:bg-zinc-50"
+                >
+                  Detail
+                </button>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.currentTarget.closest("details")?.removeAttribute("open");
+                    setEditingGaleri(album);
+                  }}
+                  className="block w-full px-4 py-3 text-left text-sm text-zinc-700 transition hover:bg-zinc-50"
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.currentTarget.closest("details")?.removeAttribute("open");
+                    setDeletingGaleri(album);
+                  }}
+                  className="block w-full px-4 py-3 text-left text-sm text-rose-600 transition hover:bg-rose-50"
+                >
+                  Hapus
+                </button>
+              </div>
+            </details>
+          </article>
+        ))}
+      </div>
+
+      {filteredAlbums.length === 0 ? (
+        <div className="mt-6 border border-dashed border-zinc-300 bg-white px-6 py-10 text-center text-sm text-zinc-500">
+          Galeri dengan judul tersebut belum ditemukan.
+        </div>
+      ) : null}
+
+      <AddGaleriModal
+        isOpen={isAddingGaleri}
+        onClose={() => setIsAddingGaleri(false)}
+        onSave={handleAddGaleri}
+      />
+      <DetailGaleriModal
+        galeri={selectedGaleri}
+        isOpen={selectedGaleri !== null}
+        onClose={() => setSelectedGaleri(null)}
+      />
+      <EditGaleriModal
+        galeri={editingGaleri}
+        isOpen={editingGaleri !== null}
+        onClose={() => setEditingGaleri(null)}
+        onSave={handleEditGaleri}
+      />
+      <DeleteGaleriModal
+        galeri={deletingGaleri}
+        isOpen={deletingGaleri !== null}
+        onClose={() => setDeletingGaleri(null)}
+        onConfirm={handleDeleteGaleri}
+      />
+    </>
+  );
+}

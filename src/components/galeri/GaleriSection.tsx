@@ -35,7 +35,9 @@ const todayFormatter = new Intl.DateTimeFormat("id-ID", {
 });
 
 export default function GaleriSection({ items }: GaleriSectionProps) {
-  const [albums, setAlbums] = useState(items);
+  const [albums, setAlbums] = useState<GaleriItem[]>(() =>
+    isFirebaseConfigured ? [] : items,
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddingGaleri, setIsAddingGaleri] = useState(false);
   const [selectedGaleri, setSelectedGaleri] = useState<GaleriItem | null>(null);

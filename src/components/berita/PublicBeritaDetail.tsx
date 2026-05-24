@@ -15,8 +15,10 @@ export default function PublicBeritaDetail({
   id,
   fallbackItem,
 }: PublicBeritaDetailProps) {
-  const [item, setItem] = useState<BeritaItem | null>(fallbackItem);
-  const [isLoading, setIsLoading] = useState(() => isFirebaseConfigured && !fallbackItem);
+  const [item, setItem] = useState<BeritaItem | null>(() =>
+    isFirebaseConfigured ? null : fallbackItem,
+  );
+  const [isLoading, setIsLoading] = useState(() => isFirebaseConfigured);
   const [syncError, setSyncError] = useState<string | null>(null);
 
   useEffect(() => {

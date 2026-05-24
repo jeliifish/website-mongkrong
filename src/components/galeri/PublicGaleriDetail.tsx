@@ -16,8 +16,10 @@ export default function PublicGaleriDetail({
   id,
   fallbackItem,
 }: PublicGaleriDetailProps) {
-  const [item, setItem] = useState<GaleriItem | null>(fallbackItem);
-  const [isLoading, setIsLoading] = useState(() => isFirebaseConfigured && !fallbackItem);
+  const [item, setItem] = useState<GaleriItem | null>(() =>
+    isFirebaseConfigured ? null : fallbackItem,
+  );
+  const [isLoading, setIsLoading] = useState(() => isFirebaseConfigured);
   const [syncError, setSyncError] = useState<string | null>(null);
 
   useEffect(() => {

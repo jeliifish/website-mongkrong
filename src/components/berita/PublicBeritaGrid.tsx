@@ -13,7 +13,10 @@ type PublicBeritaGridProps = {
 export default function PublicBeritaGrid({
   fallbackItems,
 }: PublicBeritaGridProps) {
-  const [items, setItems] = useState(fallbackItems);
+  const [items, setItems] = useState<BeritaItem[]>(() =>
+    isFirebaseConfigured ? [] : fallbackItems,
+  );
+  const [isLoading, setIsLoading] = useState(() => isFirebaseConfigured);
   const [syncError, setSyncError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -24,6 +27,8 @@ export default function PublicBeritaGrid({
     }
 
     const loadBerita = async () => {
+      setIsLoading(true);
+
       try {
         const remoteItems = await fetchBeritaItems();
 
@@ -31,18 +36,18 @@ export default function PublicBeritaGrid({
           return;
         }
 
-        if (remoteItems.length === 0) {
-          setItems(fallbackItems);
-          return;
-        }
-
         setItems(remoteItems);
         setSyncError(null);
       } catch {
         if (!isCancelled) {
+          setItems(fallbackItems);
           setSyncError(
             "Berita dari Firebase belum bisa dimuat. Sementara menampilkan data cadangan.",
           );
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoading(false);
         }
       }
     };
@@ -76,47 +81,57 @@ export default function PublicBeritaGrid({
           </p>
         </div>
 
-        <div className="divide-y divide-zinc-200">
-          {items.map((item, index) => (
-            <Link
-              key={item.id}
-              href={`/berita/${item.id}`}
-              className="group block px-6 py-6 transition hover:bg-[#f8faf8] sm:px-8"
-            >
-              <article className="grid gap-4 lg:grid-cols-[10rem_minmax(0,1fr)_11rem] lg:items-start">
-                <div className="space-y-2">
-                  <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-emerald-700">
-                    {item.category || "Berita Desa"}
-                  </span>
-                  <p className="text-sm text-zinc-500">{item.date}</p>
-                </div>
-
-                <div className="min-w-0">
-                  <div className="flex items-start gap-3">
-                    <span className="mt-1 text-sm font-semibold text-emerald-700">
-                      {String(index + 1).padStart(2, "0")}
+        {isLoading ? (
+          <div className="px-6 py-10 text-sm text-zinc-500 sm:px-8">
+            Memuat daftar berita...
+          </div>
+        ) : items.length > 0 ? (
+          <div className="divide-y divide-zinc-200">
+            {items.map((item, index) => (
+              <Link
+                key={item.id}
+                href={`/berita/${item.id}`}
+                className="group block px-6 py-6 transition hover:bg-[#f8faf8] sm:px-8"
+              >
+                <article className="grid gap-4 lg:grid-cols-[10rem_minmax(0,1fr)_11rem] lg:items-start">
+                  <div className="space-y-2">
+                    <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-emerald-700">
+                      {item.category || "Berita Desa"}
                     </span>
-                    <div className="min-w-0">
-                      <h3 className="text-2xl font-semibold tracking-tight text-zinc-900 transition group-hover:text-emerald-800">
-                        {item.title}
-                      </h3>
-                      <p className="mt-3 max-w-3xl text-sm leading-7 text-zinc-600">
-                        {item.description}
-                      </p>
+                    <p className="text-sm text-zinc-500">{item.date}</p>
+                  </div>
+
+                  <div className="min-w-0">
+                    <div className="flex items-start gap-3">
+                      <span className="mt-1 text-sm font-semibold text-emerald-700">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <div className="min-w-0">
+                        <h3 className="text-2xl font-semibold tracking-tight text-zinc-900 transition group-hover:text-emerald-800">
+                          {item.title}
+                        </h3>
+                        <p className="mt-3 max-w-3xl text-sm leading-7 text-zinc-600">
+                          {item.description}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex items-center justify-start lg:justify-end">
-                  <span className="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-4 py-2 text-sm font-semibold text-zinc-700 transition group-hover:border-emerald-300 group-hover:text-emerald-800">
-                    Baca berita
-                    <span aria-hidden="true">&rarr;</span>
-                  </span>
-                </div>
-              </article>
-            </Link>
-          ))}
-        </div>
+                  <div className="flex items-center justify-start lg:justify-end">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-4 py-2 text-sm font-semibold text-zinc-700 transition group-hover:border-emerald-300 group-hover:text-emerald-800">
+                      Baca berita
+                      <span aria-hidden="true">&rarr;</span>
+                    </span>
+                  </div>
+                </article>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="px-6 py-10 text-sm text-zinc-500 sm:px-8">
+            Belum ada berita di Firestore.
+          </div>
+        )}
       </section>
     </>
   );

@@ -30,7 +30,9 @@ type UmkmTableSectionProps = {
 
 export default function UmkmTableSection({ items }: UmkmTableSectionProps) {
   const pageSize = 5;
-  const [umkmItems, setUmkmItems] = useState(items);
+  const [umkmItems, setUmkmItems] = useState<UmkmItem[]>(() =>
+    isFirebaseConfigured ? [] : items,
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddingUmkm, setIsAddingUmkm] = useState(false);
   const [selectedUmkm, setSelectedUmkm] = useState<UmkmItem | null>(null);

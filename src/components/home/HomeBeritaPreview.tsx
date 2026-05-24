@@ -14,7 +14,10 @@ type HomeBeritaPreviewProps = {
 export default function HomeBeritaPreview({
   fallbackItems,
 }: HomeBeritaPreviewProps) {
-  const [items, setItems] = useState(fallbackItems.slice(0, 3));
+  const [items, setItems] = useState<BeritaItem[]>(() =>
+    isFirebaseConfigured ? [] : fallbackItems.slice(0, 3),
+  );
+  const [isLoading, setIsLoading] = useState(() => isFirebaseConfigured);
   const [syncError, setSyncError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -25,6 +28,8 @@ export default function HomeBeritaPreview({
     }
 
     const loadBerita = async () => {
+      setIsLoading(true);
+
       try {
         const remoteItems = await fetchBeritaItems();
 
@@ -32,13 +37,18 @@ export default function HomeBeritaPreview({
           return;
         }
 
-        setItems((remoteItems.length > 0 ? remoteItems : fallbackItems).slice(0, 3));
+        setItems(remoteItems.slice(0, 3));
         setSyncError(null);
       } catch {
         if (!isCancelled) {
+          setItems(fallbackItems.slice(0, 3));
           setSyncError(
             "Preview berita dari Firebase belum bisa dimuat. Menampilkan data cadangan.",
           );
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoading(false);
         }
       }
     };
@@ -58,31 +68,41 @@ export default function HomeBeritaPreview({
         </div>
       ) : null}
 
-      <div className="mt-8 grid gap-5 md:grid-cols-3">
-        {items.map((item) => (
-          <article
-            key={item.id}
-            className="rounded-xl border border-zinc-200 bg-white p-6"
-          >
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
-              {item.category}
-            </p>
-            <p className="mt-2 text-sm text-zinc-500">{item.date}</p>
-            <h3 className="mt-3 text-xl font-semibold tracking-tight text-zinc-900">
-              {item.title}
-            </h3>
-            <p className="mt-3 text-sm leading-7 text-zinc-600">
-              {item.description}
-            </p>
-            <Link
-              href={`/berita/${item.id}`}
-              className="mt-5 inline-flex text-sm font-semibold text-emerald-700 transition hover:text-emerald-800"
+      {isLoading ? (
+        <div className="mt-8 rounded-2xl border border-zinc-200 bg-white px-6 py-10 text-sm text-zinc-500">
+          Memuat preview berita...
+        </div>
+      ) : items.length > 0 ? (
+        <div className="mt-8 grid gap-5 md:grid-cols-3">
+          {items.map((item) => (
+            <article
+              key={item.id}
+              className="rounded-xl border border-zinc-200 bg-white p-6"
             >
-              Baca detail
-            </Link>
-          </article>
-        ))}
-      </div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
+                {item.category}
+              </p>
+              <p className="mt-2 text-sm text-zinc-500">{item.date}</p>
+              <h3 className="mt-3 text-xl font-semibold tracking-tight text-zinc-900">
+                {item.title}
+              </h3>
+              <p className="mt-3 text-sm leading-7 text-zinc-600">
+                {item.description}
+              </p>
+              <Link
+                href={`/berita/${item.id}`}
+                className="mt-5 inline-flex text-sm font-semibold text-emerald-700 transition hover:text-emerald-800"
+              >
+                Baca detail
+              </Link>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="mt-8 rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-10 text-sm text-zinc-500">
+          Belum ada berita di Firestore untuk ditampilkan di beranda.
+        </div>
+      )}
     </>
   );
 }

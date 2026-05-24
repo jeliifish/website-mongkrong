@@ -16,8 +16,10 @@ export default function PublicUmkmDetail({
   id,
   fallbackItem,
 }: PublicUmkmDetailProps) {
-  const [item, setItem] = useState<UmkmItem | null>(fallbackItem);
-  const [isLoading, setIsLoading] = useState(() => isFirebaseConfigured && !fallbackItem);
+  const [item, setItem] = useState<UmkmItem | null>(() =>
+    isFirebaseConfigured ? null : fallbackItem,
+  );
+  const [isLoading, setIsLoading] = useState(() => isFirebaseConfigured);
   const [syncError, setSyncError] = useState<string | null>(null);
 
   useEffect(() => {

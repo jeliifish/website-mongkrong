@@ -26,7 +26,9 @@ type BeritaTableSectionProps = {
 
 export default function BeritaTableSection({ items }: BeritaTableSectionProps) {
   const pageSize = 5;
-  const [beritaItems, setBeritaItems] = useState(items);
+  const [beritaItems, setBeritaItems] = useState<BeritaItem[]>(() =>
+    isFirebaseConfigured ? [] : items,
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isAddingBerita, setIsAddingBerita] = useState(false);

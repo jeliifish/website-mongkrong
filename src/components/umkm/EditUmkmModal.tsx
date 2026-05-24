@@ -3,20 +3,13 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 
 import Button from "@/components/Button";
-
-type EditUmkm = {
-  id: string;
-  name: string;
-  owner: string;
-  imageUrl?: string;
-  fileName?: string;
-};
+import type { UmkmItem } from "@/types/umkm";
 
 type EditUmkmModalProps = {
-  umkm: EditUmkm | null;
+  umkm: UmkmItem | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (umkm: EditUmkm & { file?: File | null }) => void;
+  onSave: (umkm: UmkmItem & { file?: File | null }) => void;
 };
 
 export default function EditUmkmModal({
@@ -68,9 +61,9 @@ function EditUmkmForm({
   onClose,
   onSave,
 }: {
-  umkm: EditUmkm;
+  umkm: UmkmItem;
   onClose: () => void;
-  onSave: (umkm: EditUmkm & { file?: File | null }) => void;
+  onSave: (umkm: UmkmItem & { file?: File | null }) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState(umkm.name);

@@ -1,15 +1,22 @@
 import Link from "next/link";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
+import HomeBeritaPreview from "@/components/home/HomeBeritaPreview";
+import HomeGaleriPreview from "@/components/home/HomeGaleriPreview";
+import HomeUmkmPreview from "@/components/home/HomeUmkmPreview";
+import { getFallbackBeritaItems } from "@/lib/berita-public";
+import { getFallbackGaleriItems } from "@/lib/galeri-public";
+import { getFallbackUmkmItems } from "@/lib/umkm-public";
 import {
-  featuredNews,
-  galleryMoments,
   highlights,
   profileCards,
-  umkmProducts,
 } from "@/data/site-content";
 
 export default function Home() {
+  const fallbackBeritaItems = getFallbackBeritaItems();
+  const fallbackGaleriItems = getFallbackGaleriItems();
+  const fallbackUmkmItems = getFallbackUmkmItems();
+
   return (
     <div className="min-h-screen bg-[#f6f7f4] text-zinc-900">
       <main>
@@ -125,25 +132,7 @@ export default function Home() {
               </Link>
             </div>
 
-            <div className="mt-8 grid gap-5 md:grid-cols-3">
-              {featuredNews.map((item) => (
-                <article
-                  key={item.title}
-                  className="rounded-xl border border-zinc-200 bg-white p-6"
-                >
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
-                    Berita Desa
-                  </p>
-                  <p className="mt-2 text-sm text-zinc-500">{item.date}</p>
-                  <h3 className="mt-3 text-xl font-semibold tracking-tight text-zinc-900">
-                    {item.title}
-                  </h3>
-                  <p className="mt-3 text-sm leading-7 text-zinc-600">
-                    {item.excerpt}
-                  </p>
-                </article>
-              ))}
-            </div>
+            <HomeBeritaPreview fallbackItems={fallbackBeritaItems} />
           </div>
         </section>
 
@@ -171,23 +160,7 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {galleryMoments.slice(0, 4).map((item, index) => (
-              <div
-                key={item}
-                className="flex min-h-56 items-end rounded-xl border border-zinc-200 bg-[linear-gradient(180deg,#dfe8df_0%,#bccbbd_100%)] p-5"
-              >
-                <div>
-                  <span className="inline-flex rounded-full bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
-                    Foto {index + 1}
-                  </span>
-                  <p className="mt-3 max-w-[12rem] text-lg font-semibold tracking-tight text-zinc-900">
-                    {item}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <HomeGaleriPreview fallbackItems={fallbackGaleriItems} />
         </section>
 
         <section id="umkm" className="border-t border-zinc-200 bg-white">
@@ -211,25 +184,7 @@ export default function Home() {
                   Lihat selengkapnya
                 </Link>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {umkmProducts.map((item) => (
-                  <article
-                    key={item}
-                    className="rounded-xl border border-zinc-200 bg-[#f8faf8] p-5"
-                  >
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
-                      Produk Lokal
-                    </p>
-                    <h3 className="mt-3 text-lg font-semibold text-zinc-900">
-                      {item}
-                    </h3>
-                    <p className="mt-2 text-sm leading-7 text-zinc-600">
-                      Tambahkan foto, deskripsi singkat, dan kontak pelaku usaha
-                      dari dashboard admin.
-                    </p>
-                  </article>
-                ))}
-              </div>
+              <HomeUmkmPreview fallbackItems={fallbackUmkmItems} />
             </div>
           </div>
         </section>

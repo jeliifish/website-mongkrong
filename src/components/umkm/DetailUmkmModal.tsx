@@ -1,17 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-
-type UmkmDetail = {
-  id: string;
-  name: string;
-  owner: string;
-  imageUrl?: string;
-  fileName?: string;
-};
+import type { UmkmItem } from "@/types/umkm";
 
 type DetailUmkmModalProps = {
-  umkm: UmkmDetail | null;
+  umkm: UmkmItem | null;
   isOpen: boolean;
   onClose: () => void;
 };

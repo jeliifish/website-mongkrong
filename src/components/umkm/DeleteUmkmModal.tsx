@@ -1,16 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-
-type DeleteUmkm = {
-  id: string;
-  name: string;
-  owner: string;
-  imageUrl?: string;
-};
+import type { UmkmItem } from "@/types/umkm";
 
 type DeleteUmkmModalProps = {
-  umkm: DeleteUmkm | null;
+  umkm: UmkmItem | null;
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (id: string) => void;

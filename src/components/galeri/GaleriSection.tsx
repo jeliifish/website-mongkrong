@@ -1,26 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Button from "@/components/Button";
 import SearchBar from "@/components/SearchBar";
+import {
+  getMissingCloudinaryConfig,
+  isCloudinaryConfigured,
+  uploadImageToCloudinary,
+} from "@/lib/cloudinary-upload";
+import { isFirebaseConfigured, missingFirebaseConfigKeys } from "@/lib/firebase";
+import {
+  createGaleriItem,
+  fetchGaleriItems,
+  removeGaleriItem,
+  updateGaleriItem,
+} from "@/lib/galeri-firestore";
+import type { GaleriItem } from "@/types/galeri";
 
 import AddGaleriModal from "./AddGaleriModal";
 import DeleteGaleriModal from "./DeleteGaleriModal";
 import DetailGaleriModal from "./DetailGaleriModal";
 import EditGaleriModal from "./EditGaleriModal";
 
-type AlbumItem = {
-  id: string;
-  title: string;
-  photos: string;
-  updated: string;
-  imageUrl?: string;
-  fileName?: string;
-};
-
 type GaleriSectionProps = {
-  items: AlbumItem[];
+  items: GaleriItem[];
 };
 
 const todayFormatter = new Intl.DateTimeFormat("id-ID", {
@@ -34,36 +38,97 @@ export default function GaleriSection({ items }: GaleriSectionProps) {
   const [albums, setAlbums] = useState(items);
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddingGaleri, setIsAddingGaleri] = useState(false);
-  const [selectedGaleri, setSelectedGaleri] = useState<AlbumItem | null>(null);
-  const [editingGaleri, setEditingGaleri] = useState<AlbumItem | null>(null);
-  const [deletingGaleri, setDeletingGaleri] = useState<AlbumItem | null>(null);
+  const [selectedGaleri, setSelectedGaleri] = useState<GaleriItem | null>(null);
+  const [editingGaleri, setEditingGaleri] = useState<GaleriItem | null>(null);
+  const [deletingGaleri, setDeletingGaleri] = useState<GaleriItem | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
   const filteredAlbums = albums.filter((album) =>
     album.title.toLowerCase().includes(searchQuery.trim().toLowerCase()),
   );
 
-  const handleAddGaleri = ({
+  useEffect(() => {
+    let isCancelled = false;
+
+    if (!isFirebaseConfigured) {
+      return;
+    }
+
+    const loadGaleri = async () => {
+      setIsLoading(true);
+      setSyncError(null);
+
+      try {
+        const remoteItems = await fetchGaleriItems();
+
+        if (!isCancelled) {
+          setAlbums(remoteItems);
+        }
+      } catch {
+        if (!isCancelled) {
+          setSyncError(
+            "Gagal memuat galeri dari Firestore. Data cadangan tetap ditampilkan.",
+          );
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadGaleri();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  const handleAddGaleri = async ({
     title,
     file,
   }: {
     title: string;
     file: File;
   }) => {
-    const imageUrl = URL.createObjectURL(file);
+    if (!title.trim()) {
+      return;
+    }
 
-    setAlbums((current) => [
-      {
-        id: `galeri-${Date.now()}`,
+    if (!isFirebaseConfigured) {
+      const imageUrl = URL.createObjectURL(file);
+
+      setAlbums((current) => [
+        {
+          id: `galeri-${Date.now()}`,
+          title,
+          photos: "1 foto",
+          updated: todayFormatter.format(new Date()),
+          imageUrl,
+          fileName: file.name,
+        },
+        ...current,
+      ]);
+      return;
+    }
+
+    try {
+      const uploadedImage = await uploadImageToCloudinary(file, "galeri");
+      const createdItem = await createGaleriItem({
         title,
-        photos: "1 foto",
-        updated: todayFormatter.format(new Date()),
-        imageUrl,
-        fileName: file.name,
-      },
-      ...current,
-    ]);
+        imageUrl: uploadedImage.imageUrl,
+        imagePublicId: uploadedImage.imagePublicId,
+        fileName: uploadedImage.fileName ?? file.name,
+      });
+
+      setAlbums((current) => [createdItem, ...current]);
+      setSyncError(null);
+    } catch {
+      setSyncError("Gagal menambahkan foto galeri. Cek Cloudinary preset dan Firestore.");
+    }
   };
 
-  const handleEditGaleri = ({
+  const handleEditGaleri = async ({
     id,
     title,
     file,
@@ -72,25 +137,71 @@ export default function GaleriSection({ items }: GaleriSectionProps) {
     title: string;
     file?: File | null;
   }) => {
+    const previousItems = albums;
+    const targetItem = albums.find((item) => item.id === id);
+
+    if (!targetItem) {
+      return;
+    }
+
+    const optimisticItem: GaleriItem = {
+      ...targetItem,
+      title,
+      updated: todayFormatter.format(new Date()),
+      imageUrl: file ? URL.createObjectURL(file) : targetItem.imageUrl,
+      fileName: file ? file.name : targetItem.fileName,
+    };
+
     setAlbums((current) =>
-      current.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              title,
-              updated: todayFormatter.format(new Date()),
-              imageUrl: file ? URL.createObjectURL(file) : item.imageUrl,
-              fileName: file ? file.name : item.fileName,
-            }
-          : item,
-      ),
+      current.map((item) => (item.id === optimisticItem.id ? optimisticItem : item)),
     );
+
+    if (!isFirebaseConfigured) {
+      return;
+    }
+
+    try {
+      const uploadedImage =
+        file && isCloudinaryConfigured("galeri")
+          ? await uploadImageToCloudinary(file, "galeri")
+          : undefined;
+
+      const savedItem = await updateGaleriItem({
+        ...targetItem,
+        title,
+        updated: todayFormatter.format(new Date()),
+        imageUrl: uploadedImage?.imageUrl ?? targetItem.imageUrl ?? "",
+        imagePublicId: uploadedImage?.imagePublicId ?? targetItem.imagePublicId,
+        fileName: uploadedImage?.fileName ?? targetItem.fileName,
+      });
+
+      setAlbums((current) =>
+        current.map((item) => (item.id === savedItem.id ? savedItem : item)),
+      );
+      setSyncError(null);
+    } catch {
+      setAlbums(previousItems);
+      setSyncError("Gagal memperbarui item galeri di Firestore.");
+    }
   };
 
-  const handleDeleteGaleri = (id: string) => {
+  const handleDeleteGaleri = async (id: string) => {
+    const previousItems = albums;
     setAlbums((current) => current.filter((item) => item.id !== id));
     setSelectedGaleri((current) => (current?.id === id ? null : current));
     setEditingGaleri((current) => (current?.id === id ? null : current));
+
+    if (!isFirebaseConfigured) {
+      return;
+    }
+
+    try {
+      await removeGaleriItem(id);
+      setSyncError(null);
+    } catch {
+      setAlbums(previousItems);
+      setSyncError("Gagal menghapus item galeri dari Firestore.");
+    }
   };
 
   return (
@@ -121,6 +232,32 @@ export default function GaleriSection({ items }: GaleriSectionProps) {
           </Button>
         </div>
       </div>
+
+      {!isFirebaseConfigured ? (
+        <div className="mt-5 border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
+          Firebase belum aktif penuh untuk galeri. Data masih memakai cadangan lokal.
+          {missingFirebaseConfigKeys.length > 0 ? (
+            <span className="block pt-1 text-amber-800">
+              Key yang belum diisi: {missingFirebaseConfigKeys.join(", ")}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+
+      {isFirebaseConfigured && !isCloudinaryConfigured("galeri") ? (
+        <div className="mt-5 border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
+          Upload gambar galeri ke Cloudinary belum lengkap.
+          <span className="block pt-1 text-amber-800">
+            Key yang belum diisi: {getMissingCloudinaryConfig("galeri").join(", ")}
+          </span>
+        </div>
+      ) : null}
+
+      {syncError ? (
+        <div className="mt-5 border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-800">
+          {syncError}
+        </div>
+      ) : null}
 
       <div className="mt-6 grid gap-4 md:grid-cols-3">
         {filteredAlbums.map((album, index) => (
@@ -197,7 +334,9 @@ export default function GaleriSection({ items }: GaleriSectionProps) {
 
       {filteredAlbums.length === 0 ? (
         <div className="mt-6 border border-dashed border-zinc-300 bg-white px-6 py-10 text-center text-sm text-zinc-500">
-          Galeri dengan judul tersebut belum ditemukan.
+          {isLoading
+            ? "Memuat galeri dari Firestore..."
+            : "Galeri dengan judul tersebut belum ditemukan."}
         </div>
       ) : null}
 

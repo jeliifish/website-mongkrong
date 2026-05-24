@@ -1,6 +1,7 @@
 import BeritaTableSection from "@/components/berita/BeritaTableSection";
+import type { BeritaItem } from "@/types/berita";
 
-const beritaRows = [
+const beritaRows: BeritaItem[] = [
   {
     id: "berita-1",
     title: "Kerja Bakti Lingkungan RW 03",

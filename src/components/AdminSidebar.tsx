@@ -1,14 +1,36 @@
 "use client";
 
+import { startTransition, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { signOut } from "firebase/auth";
+import { useAuth } from "@/components/AuthProvider";
 import { adminNavigation } from "@/components/adminNavigation";
+import { auth } from "@/lib/firebase";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user } = useAuth();
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  async function handleLogout() {
+    setIsSigningOut(true);
+
+    try {
+      if (auth) {
+        await signOut(auth);
+      }
+    } finally {
+      startTransition(() => {
+        router.replace("/login");
+      });
+      setIsSigningOut(false);
+    }
+  }
 
   return (
-    <aside className="flex flex-col border-b border-zinc-200 bg-white lg:min-h-screen lg:border-b-0 lg:border-r">
+    <aside className="flex flex-col border-b border-zinc-200 bg-white lg:h-screen lg:overflow-y-auto lg:border-b-0 lg:border-r">
       <div className="px-6 py-6 lg:px-7 lg:py-7">
         <Link
           href="/"
@@ -56,9 +78,12 @@ export default function AdminSidebar() {
       </div>
 
       <div className="mt-auto border-t border-zinc-200 px-6 py-6 lg:px-7">
-        <Link
-          href="/login"
-          className="inline-flex items-center gap-3 text-sm font-semibold text-rose-600 transition hover:text-rose-700"
+        <p className="mb-4 truncate text-sm text-zinc-500">{user?.email}</p>
+        <button
+          type="button"
+          onClick={handleLogout}
+          disabled={isSigningOut}
+          className="inline-flex items-center gap-3 text-sm font-semibold text-rose-600 transition hover:text-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
           <span
             aria-hidden="true"
@@ -67,8 +92,8 @@ export default function AdminSidebar() {
             <span className="absolute left-[0.85rem] top-1/2 h-2.5 w-2.5 -translate-y-1/2 rotate-45 border-r-2 border-t-2 border-current" />
             <span className="absolute left-[1.15rem] top-1/2 h-0.5 w-3 -translate-y-1/2 bg-current" />
           </span>
-          Logout
-        </Link>
+          {isSigningOut ? "Logout..." : "Logout"}
+        </button>
       </div>
     </aside>
   );

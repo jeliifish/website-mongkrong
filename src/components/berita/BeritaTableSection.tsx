@@ -1,26 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Button from "@/components/Button";
 import Pagination from "@/components/Pagination";
 import SearchBar from "@/components/SearchBar";
 import Table from "@/components/Table";
+import {
+  createBeritaItem,
+  fetchBeritaItems,
+  removeBeritaItem,
+  updateBeritaItem,
+} from "@/lib/berita-firestore";
+import { isFirebaseConfigured, missingFirebaseConfigKeys } from "@/lib/firebase";
+import type { BeritaItem, NewBeritaInput } from "@/types/berita";
 
 import AddBeritaModal from "./AddBeritaModal";
 import DetailBeritaModal from "./DetailBeritaModal";
 import DeleteBeritaModal from "./DeleteBeritaModal";
 import EditBeritaModal from "./EditBeritaModal";
-
-type BeritaItem = {
-  id: string;
-  title: string;
-  description: string;
-  date: string;
-  category: string;
-  author: string;
-  content: string[];
-};
 
 type BeritaTableSectionProps = {
   items: BeritaItem[];
@@ -29,14 +27,66 @@ type BeritaTableSectionProps = {
 export default function BeritaTableSection({ items }: BeritaTableSectionProps) {
   const pageSize = 5;
   const [beritaItems, setBeritaItems] = useState(items);
+  const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isAddingBerita, setIsAddingBerita] = useState(false);
   const [selectedBerita, setSelectedBerita] = useState<BeritaItem | null>(null);
   const [editingBerita, setEditingBerita] = useState<BeritaItem | null>(null);
   const [deletingBerita, setDeletingBerita] = useState<BeritaItem | null>(null);
-  const totalPages = Math.max(1, Math.ceil(beritaItems.length / pageSize));
+  const [isLoading, setIsLoading] = useState(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    if (!isFirebaseConfigured) {
+      return;
+    }
+
+    const loadBerita = async () => {
+      setIsLoading(true);
+      setSyncError(null);
+
+      try {
+        const remoteItems = await fetchBeritaItems();
+
+        if (!isCancelled) {
+          setBeritaItems(remoteItems);
+          setCurrentPage(1);
+        }
+      } catch {
+        if (!isCancelled) {
+          setSyncError("Gagal memuat berita dari Firestore. Sementara data lokal tetap ditampilkan.");
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadBerita();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  const filteredItems = beritaItems.filter((item) => {
+    const query = searchQuery.trim().toLowerCase();
+
+    if (!query) {
+      return true;
+    }
+
+    return [item.title, item.description, item.date].some((value) =>
+      value.toLowerCase().includes(query),
+    );
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
   const activePage = Math.min(currentPage, totalPages);
-  const paginatedItems = beritaItems.slice(
+  const paginatedItems = filteredItems.slice(
     (activePage - 1) * pageSize,
     activePage * pageSize,
   );
@@ -61,21 +111,35 @@ export default function BeritaTableSection({ items }: BeritaTableSectionProps) {
     ],
   }));
 
-  const handleSaveEdit = (updatedBerita: BeritaItem) => {
+  const handleSaveEdit = async (updatedBerita: BeritaItem) => {
+    const previousItems = beritaItems;
+
     setBeritaItems((current) =>
       current.map((item) => (item.id === updatedBerita.id ? updatedBerita : item)),
     );
+
+    if (!isFirebaseConfigured) {
+      return;
+    }
+
+    try {
+      const savedItem = await updateBeritaItem(updatedBerita);
+
+      setBeritaItems((current) =>
+        current.map((item) => (item.id === savedItem.id ? savedItem : item)),
+      );
+      setSyncError(null);
+    } catch {
+      setBeritaItems(previousItems);
+      setSyncError("Gagal menyimpan perubahan berita ke Firestore.");
+    }
   };
 
-  const handleAddBerita = ({
+  const handleAddBerita = async ({
     title,
     description,
     date,
-  }: {
-    title: string;
-    description: string;
-    date: string;
-  }) => {
+  }: NewBeritaInput) => {
     const trimmedTitle = title.trim();
     const trimmedDescription = description.trim();
     const trimmedDate = date.trim();
@@ -84,7 +148,7 @@ export default function BeritaTableSection({ items }: BeritaTableSectionProps) {
       return;
     }
 
-    const newItem: BeritaItem = {
+    const localItem: BeritaItem = {
       id: `berita-${Date.now()}`,
       title: trimmedTitle,
       description: trimmedDescription,
@@ -94,17 +158,52 @@ export default function BeritaTableSection({ items }: BeritaTableSectionProps) {
       content: [trimmedDescription],
     };
 
-    setBeritaItems((current) => [newItem, ...current]);
-    setCurrentPage(1);
+    if (!isFirebaseConfigured) {
+      setBeritaItems((current) => [localItem, ...current]);
+      setCurrentPage(1);
+      setSearchQuery("");
+      return;
+    }
+
+    try {
+      const createdItem = await createBeritaItem({
+        title: trimmedTitle,
+        description: trimmedDescription,
+        date: trimmedDate,
+      });
+
+      setBeritaItems((current) => [createdItem, ...current]);
+      setCurrentPage(1);
+      setSearchQuery("");
+      setSyncError(null);
+    } catch {
+      setSyncError("Gagal menambahkan berita ke Firestore.");
+    }
   };
 
-  const handleDeleteBerita = (id: string) => {
+  const handleDeleteBerita = async (id: string) => {
+    const previousItems = beritaItems;
     const nextItems = beritaItems.filter((item) => item.id !== id);
 
     setBeritaItems(nextItems);
     setSelectedBerita((current) => (current?.id === id ? null : current));
     setEditingBerita((current) => (current?.id === id ? null : current));
-    setCurrentPage((current) => Math.min(current, Math.max(1, Math.ceil(nextItems.length / pageSize))));
+    setCurrentPage(1);
+
+    if (!isFirebaseConfigured) {
+      return;
+    }
+
+    try {
+      await removeBeritaItem(id);
+      setSyncError(null);
+    } catch {
+      setBeritaItems(previousItems);
+      setCurrentPage((current) =>
+        Math.min(current, Math.max(1, Math.ceil(previousItems.length / pageSize))),
+      );
+      setSyncError("Gagal menghapus berita dari Firestore.");
+    }
   };
 
   return (
@@ -115,6 +214,11 @@ export default function BeritaTableSection({ items }: BeritaTableSectionProps) {
             <SearchBar
               placeholder="Cari berita atau pengumuman"
               className="w-full max-w-2xl"
+              value={searchQuery}
+              onChange={(value) => {
+                setSearchQuery(value);
+                setCurrentPage(1);
+              }}
             />
             <Button fullWidth className="gap-3" onClick={() => setIsAddingBerita(true)}>
               <svg
@@ -133,28 +237,49 @@ export default function BeritaTableSection({ items }: BeritaTableSectionProps) {
               <span>Tulis Berita</span>
             </Button>
           </div>
+
+          {!isFirebaseConfigured ? (
+            <div className="mt-4 border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
+              Firebase belum aktif di project lokal ini. Isi <code>.env.local</code> dengan
+              config Web App dulu. Selama itu, halaman berita masih memakai data lokal.
+              {missingFirebaseConfigKeys.length > 0 ? (
+                <span className="block pt-1 text-amber-800">
+                  Key yang belum diisi: {missingFirebaseConfigKeys.join(", ")}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
+
+          {syncError ? (
+            <div className="mt-4 border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-800">
+              {syncError}
+            </div>
+          ) : null}
         </div>
 
         <section className="mt-1 flex min-h-0 flex-1 flex-col">
-        <Table
-          columns={[
-            { label: "Judul" },
-            { label: "Deskripsi" },
-            { label: "Tanggal" },
-            { label: "Aksi", className: "text-right" },
-          ]}
-          rows={tableRows}
-          gridTemplate="1.2fr 2.4fr 0.9fr 0.5fr"
-          scrollable
-          className="h-full"
-        />
-        <Pagination
-          currentPage={activePage}
-          totalPages={totalPages}
-          totalItems={beritaItems.length}
-          pageSize={pageSize}
-          onPageChange={(page) => setCurrentPage(Math.min(Math.max(page, 1), totalPages))}
-        />
+          <Table
+            columns={[
+              { label: "Judul" },
+              { label: "Deskripsi" },
+              { label: "Tanggal" },
+              { label: "Aksi", className: "text-right" },
+            ]}
+            rows={tableRows}
+            gridTemplate="1.2fr 2.4fr 0.9fr 0.5fr"
+            scrollable
+            className="h-full"
+            emptyMessage={
+              isLoading ? "Memuat berita dari Firestore..." : "Belum ada berita yang tersedia."
+            }
+          />
+          <Pagination
+            currentPage={activePage}
+            totalPages={totalPages}
+            totalItems={filteredItems.length}
+            pageSize={pageSize}
+            onPageChange={(page) => setCurrentPage(Math.min(Math.max(page, 1), totalPages))}
+          />
         </section>
       </div>
 

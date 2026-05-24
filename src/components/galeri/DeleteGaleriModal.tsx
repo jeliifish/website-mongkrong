@@ -1,15 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-
-type DeleteGaleri = {
-  id: string;
-  title: string;
-  imageUrl?: string;
-};
+import type { GaleriItem } from "@/types/galeri";
 
 type DeleteGaleriModalProps = {
-  galeri: DeleteGaleri | null;
+  galeri: GaleriItem | null;
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (id: string) => void;

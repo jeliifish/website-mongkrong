@@ -8,7 +8,7 @@ export default function ProfilPage() {
     <div className="min-h-screen bg-[#f6f7f4] text-zinc-900">
       <Header variant="solid" />
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-7xl px-4 pb-16 pt-32 sm:px-6 sm:pt-36 lg:px-8">
         <section className="rounded-3xl bg-white p-8 shadow-sm sm:p-10">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">
             Profil Desa

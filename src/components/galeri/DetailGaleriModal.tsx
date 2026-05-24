@@ -1,17 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-
-type GaleriDetail = {
-  title: string;
-  photos: string;
-  updated: string;
-  imageUrl?: string;
-  fileName?: string;
-};
+import type { GaleriItem } from "@/types/galeri";
 
 type DetailGaleriModalProps = {
-  galeri: GaleriDetail | null;
+  galeri: GaleriItem | null;
   isOpen: boolean;
   onClose: () => void;
 };

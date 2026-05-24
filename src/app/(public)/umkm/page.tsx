@@ -1,13 +1,16 @@
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
-import { umkmProducts } from "@/data/site-content";
+import PublicUmkmGrid from "@/components/umkm/PublicUmkmGrid";
+import { getFallbackUmkmItems } from "@/lib/umkm-public";
 
 export default function UmkmPage() {
+  const fallbackItems = getFallbackUmkmItems();
+
   return (
     <div className="min-h-screen bg-[#f6f7f4] text-zinc-900">
       <Header variant="solid" />
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-7xl px-4 pb-16 pt-32 sm:px-6 sm:pt-36 lg:px-8">
         <section className="rounded-3xl bg-white p-8 shadow-sm sm:p-10">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">
             UMKM Desa
@@ -21,25 +24,7 @@ export default function UmkmPage() {
           </p>
         </section>
 
-        <section className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          {umkmProducts.map((item) => (
-            <article
-              key={item}
-              className="rounded-xl border border-zinc-200 bg-white p-6"
-            >
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
-                Produk Lokal
-              </p>
-              <h2 className="mt-3 text-xl font-semibold tracking-tight text-zinc-900">
-                {item}
-              </h2>
-              <p className="mt-3 text-sm leading-7 text-zinc-600">
-                Tambahkan foto produk, deskripsi singkat, harga, dan kontak
-                pelaku usaha dari dashboard admin.
-              </p>
-            </article>
-          ))}
-        </section>
+        <PublicUmkmGrid fallbackItems={fallbackItems} />
       </main>
 
       <Footer />

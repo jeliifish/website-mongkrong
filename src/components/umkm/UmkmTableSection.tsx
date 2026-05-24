@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Button from "@/components/Button";
 import Pagination from "@/components/Pagination";
@@ -10,14 +10,19 @@ import AddUmkmModal from "@/components/umkm/AddUmkmModal";
 import DeleteUmkmModal from "@/components/umkm/DeleteUmkmModal";
 import DetailUmkmModal from "@/components/umkm/DetailUmkmModal";
 import EditUmkmModal from "@/components/umkm/EditUmkmModal";
-
-type UmkmItem = {
-  id: string;
-  name: string;
-  owner: string;
-  imageUrl?: string;
-  fileName?: string;
-};
+import {
+  getMissingCloudinaryConfig,
+  isCloudinaryConfigured,
+  uploadImageToCloudinary,
+} from "@/lib/cloudinary-upload";
+import {
+  createUmkmItem,
+  fetchUmkmItems,
+  removeUmkmItem,
+  updateUmkmItem,
+} from "@/lib/umkm-firestore";
+import { isFirebaseConfigured, missingFirebaseConfigKeys } from "@/lib/firebase";
+import type { UmkmItem } from "@/types/umkm";
 
 type UmkmTableSectionProps = {
   items: UmkmItem[];
@@ -32,6 +37,44 @@ export default function UmkmTableSection({ items }: UmkmTableSectionProps) {
   const [editingUmkm, setEditingUmkm] = useState<UmkmItem | null>(null);
   const [deletingUmkm, setDeletingUmkm] = useState<UmkmItem | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    if (!isFirebaseConfigured) {
+      return;
+    }
+
+    const loadUmkm = async () => {
+      setIsLoading(true);
+      setSyncError(null);
+
+      try {
+        const remoteItems = await fetchUmkmItems();
+
+        if (!isCancelled) {
+          setUmkmItems(remoteItems);
+          setCurrentPage(1);
+        }
+      } catch {
+        if (!isCancelled) {
+          setSyncError("Gagal memuat data UMKM dari Firestore. Data cadangan tetap ditampilkan.");
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadUmkm();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
 
   const filteredItems = umkmItems.filter(
     (item) =>
@@ -68,7 +111,7 @@ export default function UmkmTableSection({ items }: UmkmTableSectionProps) {
     ],
   }));
 
-  const handleAddUmkm = ({
+  const handleAddUmkm = async ({
     name,
     owner,
     file,
@@ -77,34 +120,89 @@ export default function UmkmTableSection({ items }: UmkmTableSectionProps) {
     owner: string;
     file: File | null;
   }) => {
-    setUmkmItems((current) => [
-      {
-        id: `umkm-${Date.now()}`,
+    if (!name.trim() || !owner.trim()) {
+      return;
+    }
+
+    if (!isFirebaseConfigured) {
+      setUmkmItems((current) => [
+        {
+          id: `umkm-${Date.now()}`,
+          name,
+          owner,
+          imageUrl: file ? URL.createObjectURL(file) : undefined,
+          fileName: file?.name,
+        },
+        ...current,
+      ]);
+      setCurrentPage(1);
+      return;
+    }
+
+    try {
+      const uploadedImage =
+        file && isCloudinaryConfigured("umkm")
+          ? await uploadImageToCloudinary(file, "umkm")
+          : undefined;
+
+      const createdItem = await createUmkmItem({
         name,
         owner,
-        imageUrl: file ? URL.createObjectURL(file) : undefined,
-        fileName: file?.name,
-      },
-      ...current,
-    ]);
-    setCurrentPage(1);
+        imageUrl: uploadedImage?.imageUrl,
+        imagePublicId: uploadedImage?.imagePublicId,
+        fileName: uploadedImage?.fileName ?? file?.name,
+      });
+
+      setUmkmItems((current) => [createdItem, ...current]);
+      setCurrentPage(1);
+      setSyncError(null);
+    } catch {
+      setSyncError("Gagal menambahkan UMKM. Cek Cloudinary preset dan koneksi Firestore.");
+    }
   };
 
-  const handleEditUmkm = (updatedUmkm: UmkmItem & { file?: File | null }) => {
+  const handleEditUmkm = async (updatedUmkm: UmkmItem & { file?: File | null }) => {
+    const previousItems = umkmItems;
+
+    const optimisticItem: UmkmItem = {
+      ...updatedUmkm,
+      imageUrl: updatedUmkm.file ? URL.createObjectURL(updatedUmkm.file) : updatedUmkm.imageUrl,
+      fileName: updatedUmkm.file ? updatedUmkm.file.name : updatedUmkm.fileName,
+    };
+
     setUmkmItems((current) =>
-      current.map((item) =>
-        item.id === updatedUmkm.id
-          ? {
-              ...updatedUmkm,
-              imageUrl: updatedUmkm.file ? URL.createObjectURL(updatedUmkm.file) : item.imageUrl,
-              fileName: updatedUmkm.file ? updatedUmkm.file.name : item.fileName,
-            }
-          : item,
-      ),
+      current.map((item) => (item.id === optimisticItem.id ? optimisticItem : item)),
     );
+
+    if (!isFirebaseConfigured) {
+      return;
+    }
+
+    try {
+      const uploadedImage =
+        updatedUmkm.file && isCloudinaryConfigured("umkm")
+          ? await uploadImageToCloudinary(updatedUmkm.file, "umkm")
+          : undefined;
+
+      const savedItem = await updateUmkmItem({
+        ...updatedUmkm,
+        imageUrl: uploadedImage?.imageUrl ?? updatedUmkm.imageUrl,
+        imagePublicId: uploadedImage?.imagePublicId ?? updatedUmkm.imagePublicId,
+        fileName: uploadedImage?.fileName ?? updatedUmkm.fileName,
+      });
+
+      setUmkmItems((current) =>
+        current.map((item) => (item.id === savedItem.id ? savedItem : item)),
+      );
+      setSyncError(null);
+    } catch {
+      setUmkmItems(previousItems);
+      setSyncError("Gagal memperbarui UMKM di Firestore.");
+    }
   };
 
-  const handleDeleteUmkm = (id: string) => {
+  const handleDeleteUmkm = async (id: string) => {
+    const previousItems = umkmItems;
     const nextItems = umkmItems.filter((item) => item.id !== id);
 
     setUmkmItems(nextItems);
@@ -125,6 +223,18 @@ export default function UmkmTableSection({ items }: UmkmTableSectionProps) {
         ),
       ),
     );
+
+    if (!isFirebaseConfigured) {
+      return;
+    }
+
+    try {
+      await removeUmkmItem(id);
+      setSyncError(null);
+    } catch {
+      setUmkmItems(previousItems);
+      setSyncError("Gagal menghapus UMKM dari Firestore.");
+    }
   };
 
   return (
@@ -159,19 +269,48 @@ export default function UmkmTableSection({ items }: UmkmTableSectionProps) {
         </div>
       </div>
 
+      {!isFirebaseConfigured ? (
+        <div className="border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
+          Firebase belum aktif penuh untuk UMKM. Data masih memakai cadangan lokal.
+          {missingFirebaseConfigKeys.length > 0 ? (
+            <span className="block pt-1 text-amber-800">
+              Key yang belum diisi: {missingFirebaseConfigKeys.join(", ")}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+
+      {isFirebaseConfigured && !isCloudinaryConfigured("umkm") ? (
+        <div className="border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
+          Upload gambar UMKM ke Cloudinary belum lengkap.
+          <span className="block pt-1 text-amber-800">
+            Key yang belum diisi: {getMissingCloudinaryConfig("umkm").join(", ")}
+          </span>
+        </div>
+      ) : null}
+
+      {syncError ? (
+        <div className="border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-800">
+          {syncError}
+        </div>
+      ) : null}
+
       <div className="flex min-h-0 flex-1 flex-col">
         <Table
-        columns={[
-          { label: "Foto" },
-          { label: "Nama Usaha" },
-          { label: "Pemilik" },
-          { label: "Aksi", className: "text-right" },
-        ]}
-        rows={tableRows}
-        gridTemplate="0.5fr 1.9fr 1.2fr 0.5fr"
-        scrollable
-        className="h-full"
-      />
+          columns={[
+            { label: "Foto" },
+            { label: "Nama Usaha" },
+            { label: "Pemilik" },
+            { label: "Aksi", className: "text-right" },
+          ]}
+          rows={tableRows}
+          gridTemplate="0.5fr 1.9fr 1.2fr 0.5fr"
+          scrollable
+          className="h-full"
+          emptyMessage={
+            isLoading ? "Memuat data UMKM dari Firestore..." : "Belum ada data UMKM."
+          }
+        />
         <Pagination
           currentPage={activePage}
           totalPages={totalPages}

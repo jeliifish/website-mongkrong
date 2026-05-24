@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Button from "@/components/Button";
+import LoginForm from "@/components/LoginForm";
 
 export default function LoginPage() {
   return (
@@ -32,36 +32,10 @@ export default function LoginPage() {
               data UMKM desa.
             </p>
 
-            <form className="mt-14 max-w-[31rem]">
-              <div className="space-y-4">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="admin@desamongkrong.id"
-                  className="h-14 w-full rounded-2xl border border-zinc-200 px-5 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-[#1f7a4a] focus:ring-4 focus:ring-[#1f7a4a]/10"
-                />
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="Masukkan kata sandi"
-                  className="h-14 w-full rounded-2xl border border-zinc-200 px-5 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-[#1f7a4a] focus:ring-4 focus:ring-[#1f7a4a]/10"
-                />
-              </div>
-
-              <Button type="submit" fullWidth className="mt-10">
-                Sign In
-              </Button>
-            </form>
+            <LoginForm />
           </div>
 
-          <div className="text-sm text-zinc-500">
-            Don&apos;t have an account?{" "}
-            <Link href="/" className="font-semibold text-[#1f7a4a]">
-              Hubungi admin utama
-            </Link>
-          </div>
+          <div />
         </section>
 
         <section className="relative hidden min-h-screen overflow-hidden bg-[linear-gradient(145deg,#8ebc8f_0%,#1f7a4a_100%)] lg:block">

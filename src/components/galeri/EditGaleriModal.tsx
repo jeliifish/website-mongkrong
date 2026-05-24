@@ -3,16 +3,10 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 
 import Button from "@/components/Button";
-
-type EditGaleri = {
-  id: string;
-  title: string;
-  imageUrl?: string;
-  fileName?: string;
-};
+import type { GaleriItem } from "@/types/galeri";
 
 type EditGaleriModalProps = {
-  galeri: EditGaleri | null;
+  galeri: GaleriItem | null;
   isOpen: boolean;
   onClose: () => void;
   onSave: (galeri: { id: string; title: string; file?: File | null }) => void;
@@ -63,7 +57,7 @@ export default function EditGaleriModal({
 }
 
 type EditGaleriFormProps = {
-  galeri: EditGaleri;
+  galeri: GaleriItem;
   onClose: () => void;
   onSave: (galeri: { id: string; title: string; file?: File | null }) => void;
 };

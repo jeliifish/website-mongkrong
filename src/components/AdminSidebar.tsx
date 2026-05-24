@@ -4,14 +4,12 @@ import { startTransition, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
-import { useAuth } from "@/components/AuthProvider";
 import { adminNavigation } from "@/components/adminNavigation";
 import { auth } from "@/lib/firebase";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useAuth();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   async function handleLogout() {
@@ -78,7 +76,6 @@ export default function AdminSidebar() {
       </div>
 
       <div className="mt-auto border-t border-zinc-200 px-6 py-6 lg:px-7">
-        <p className="mb-4 truncate text-sm text-zinc-500">{user?.email}</p>
         <button
           type="button"
           onClick={handleLogout}
@@ -87,10 +84,21 @@ export default function AdminSidebar() {
         >
           <span
             aria-hidden="true"
-            className="relative h-9 w-9 rounded-full border border-rose-200"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-rose-200 bg-rose-50"
           >
-            <span className="absolute left-[0.85rem] top-1/2 h-2.5 w-2.5 -translate-y-1/2 rotate-45 border-r-2 border-t-2 border-current" />
-            <span className="absolute left-[1.15rem] top-1/2 h-0.5 w-3 -translate-y-1/2 bg-current" />
+            <svg
+              viewBox="0 0 24 24"
+              className="h-4.5 w-4.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <path d="M16 17l5-5-5-5" />
+              <path d="M21 12H9" />
+            </svg>
           </span>
           {isSigningOut ? "Logout..." : "Logout"}
         </button>

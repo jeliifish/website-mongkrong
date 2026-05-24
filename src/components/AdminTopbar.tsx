@@ -1,16 +1,14 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useAuth } from "@/components/AuthProvider";
 import { adminNavigation } from "@/components/adminNavigation";
 
 export default function AdminTopbar() {
   const pathname = usePathname();
-  const { user } = useAuth();
   const current =
     adminNavigation.find((item) => item.href === pathname) ?? adminNavigation[0];
-  const adminLabel = user?.email ?? "Admin Desa";
-  const adminInitials = adminLabel.slice(0, 2).toUpperCase();
+  const adminLabel = "Admin Desa";
+  const adminInitials = "AD";
 
   return (
     <header className="border-b border-zinc-200 bg-white lg:sticky lg:top-0 lg:z-10">

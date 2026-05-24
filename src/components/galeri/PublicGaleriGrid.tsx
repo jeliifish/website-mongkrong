@@ -67,7 +67,7 @@ export default function PublicGaleriGrid({ fallbackItems }: PublicGaleriGridProp
       ) : null}
 
       {isLoading ? (
-        <div className="mt-10 rounded-2xl border border-zinc-200 bg-white px-6 py-12 text-center text-sm text-zinc-500">
+        <div className="mt-10 rounded-2xl border border-zinc-200 bg-white px-5 py-10 text-center text-sm text-zinc-500 sm:px-6 sm:py-12">
           Memuat galeri...
         </div>
       ) : (
@@ -79,15 +79,15 @@ export default function PublicGaleriGrid({ fallbackItems }: PublicGaleriGridProp
             >
               <Link href={`/galeri/${item.id}`} className="block">
                 <div
-                  className="flex min-h-64 items-end bg-[linear-gradient(180deg,#dfe8df_0%,#bccbbd_100%)] bg-cover bg-center p-5"
+                  className="flex min-h-52 items-end bg-[linear-gradient(180deg,#dfe8df_0%,#bccbbd_100%)] bg-cover bg-center p-4 sm:min-h-64 sm:p-5"
                   style={item.imageUrl ? { backgroundImage: `url(${item.imageUrl})` } : undefined}
                 >
                   <span className="inline-flex rounded-full bg-white/85 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
                     Foto {index + 1}
                   </span>
                 </div>
-                <div className="p-5">
-                  <h2 className="text-lg font-semibold tracking-tight text-zinc-900">
+                <div className="p-4 sm:p-5">
+                  <h2 className="text-base font-semibold tracking-tight text-zinc-900 sm:text-lg">
                     {item.title}
                   </h2>
                   <p className="mt-2 text-sm text-zinc-500">Update: {item.updated}</p>
@@ -102,7 +102,7 @@ export default function PublicGaleriGrid({ fallbackItems }: PublicGaleriGridProp
       )}
 
       {!isLoading && items.length === 0 ? (
-        <div className="mt-10 rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-12 text-center text-sm text-zinc-500">
+        <div className="mt-10 rounded-2xl border border-dashed border-zinc-300 bg-white px-5 py-10 text-center text-sm text-zinc-500 sm:px-6 sm:py-12">
           Belum ada foto galeri di Firestore.
         </div>
       ) : null}

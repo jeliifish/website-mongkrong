@@ -65,12 +65,14 @@ export default function HomeUmkmPreview({ fallbackItems }: HomeUmkmPreviewProps)
             <Link
               key={item.id}
               href={`/umkm/${item.id}`}
-              className="rounded-xl border border-zinc-200 bg-[#f8faf8] p-5 transition hover:border-emerald-200 hover:bg-white"
+              className="rounded-xl border border-zinc-200 bg-[#f8faf8] p-4 transition hover:border-emerald-200 hover:bg-white sm:p-5"
             >
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
                 Produk Lokal
               </p>
-              <h3 className="mt-3 text-lg font-semibold text-zinc-900">{item.name}</h3>
+              <h3 className="mt-3 text-base font-semibold text-zinc-900 sm:text-lg">
+                {item.name}
+              </h3>
               <p className="mt-2 text-sm leading-7 text-zinc-600">
                 Pemilik: {item.owner}
               </p>
@@ -79,7 +81,7 @@ export default function HomeUmkmPreview({ fallbackItems }: HomeUmkmPreviewProps)
           ))}
         </div>
       ) : (
-        <div className="rounded-2xl border border-dashed border-zinc-300 bg-[#f8faf8] px-6 py-10 text-sm text-zinc-500">
+        <div className="rounded-2xl border border-dashed border-zinc-300 bg-[#f8faf8] px-5 py-8 text-sm text-zinc-500 sm:px-6 sm:py-10">
           Belum ada data UMKM di Firestore untuk ditampilkan di beranda.
         </div>
       )}

@@ -63,7 +63,7 @@ export default function PublicGaleriDetail({
 
   if (isLoading) {
     return (
-      <section className="rounded-[2rem] border border-zinc-200 bg-white px-8 py-10 shadow-sm">
+      <section className="rounded-[2rem] border border-zinc-200 bg-white px-5 py-8 shadow-sm sm:px-8 sm:py-10">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">
           Galeri Desa
         </p>
@@ -76,11 +76,11 @@ export default function PublicGaleriDetail({
 
   if (!item) {
     return (
-      <section className="rounded-[2rem] border border-zinc-200 bg-white px-8 py-10 shadow-sm">
+      <section className="rounded-[2rem] border border-zinc-200 bg-white px-5 py-8 shadow-sm sm:px-8 sm:py-10">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-rose-700">
           Galeri tidak ditemukan
         </p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-950">
+        <h1 className="mt-3 text-2xl font-semibold tracking-tight text-zinc-950 sm:text-3xl">
           Foto yang kamu cari belum tersedia
         </h1>
         <p className="mt-4 max-w-2xl text-base leading-8 text-zinc-600">
@@ -99,7 +99,7 @@ export default function PublicGaleriDetail({
 
   return (
     <>
-      <section className="rounded-[2rem] border border-zinc-200 bg-white px-8 py-8 shadow-sm sm:px-10 sm:py-10">
+      <section className="rounded-[2rem] border border-zinc-200 bg-white px-5 py-6 shadow-sm sm:px-10 sm:py-10">
         <Link
           href="/galeri"
           className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-700 transition hover:text-emerald-800"
@@ -116,21 +116,21 @@ export default function PublicGaleriDetail({
           <span className="text-zinc-500">{item.updated}</span>
         </div>
 
-        <h1 className="mt-5 max-w-5xl text-4xl font-semibold tracking-tight text-zinc-950 sm:text-5xl">
+        <h1 className="mt-5 max-w-5xl text-3xl font-semibold tracking-tight text-zinc-950 sm:text-5xl">
           {item.title}
         </h1>
       </section>
 
       {syncError ? (
-        <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
+        <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900 sm:mt-8">
           {syncError}
         </div>
       ) : null}
 
-      <section className="mt-8">
+      <section className="mt-6 sm:mt-8">
         <article className="overflow-hidden rounded-[2rem] border border-zinc-200 bg-white shadow-sm">
           <div
-            className="min-h-[30rem] bg-[linear-gradient(180deg,#dfe8df_0%,#bccbbd_100%)] bg-cover bg-center"
+            className="min-h-[18rem] bg-[linear-gradient(180deg,#dfe8df_0%,#bccbbd_100%)] bg-cover bg-center sm:min-h-[24rem] lg:min-h-[30rem]"
             style={item.imageUrl ? { backgroundImage: `url(${item.imageUrl})` } : undefined}
           />
         </article>

@@ -68,11 +68,11 @@ export default function PublicBeritaGrid({
       ) : null}
 
       <section className="mt-10 overflow-hidden rounded-[2rem] border border-zinc-200 bg-white shadow-sm">
-        <div className="border-b border-zinc-200 px-6 py-6 sm:px-8">
+        <div className="border-b border-zinc-200 px-5 py-5 sm:px-8 sm:py-6">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">
             Daftar Berita
           </p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900">
+          <h2 className="mt-2 text-xl font-semibold tracking-tight text-zinc-900 sm:text-2xl">
             Pilih berita yang ingin dibaca
           </h2>
           <p className="mt-2 max-w-3xl text-sm leading-7 text-zinc-600">
@@ -91,7 +91,7 @@ export default function PublicBeritaGrid({
               <Link
                 key={item.id}
                 href={`/berita/${item.id}`}
-                className="group block px-6 py-6 transition hover:bg-[#f8faf8] sm:px-8"
+                className="group block px-5 py-5 transition hover:bg-[#f8faf8] sm:px-8 sm:py-6"
               >
                 <article className="grid gap-4 lg:grid-cols-[10rem_minmax(0,1fr)_11rem] lg:items-start">
                   <div className="space-y-2">
@@ -103,11 +103,11 @@ export default function PublicBeritaGrid({
 
                   <div className="min-w-0">
                     <div className="flex items-start gap-3">
-                      <span className="mt-1 text-sm font-semibold text-emerald-700">
+                      <span className="mt-0.5 text-sm font-semibold text-emerald-700">
                         {String(index + 1).padStart(2, "0")}
                       </span>
                       <div className="min-w-0">
-                        <h3 className="text-2xl font-semibold tracking-tight text-zinc-900 transition group-hover:text-emerald-800">
+                        <h3 className="text-xl font-semibold tracking-tight text-zinc-900 transition group-hover:text-emerald-800 sm:text-2xl">
                           {item.title}
                         </h3>
                         <p className="mt-3 max-w-3xl text-sm leading-7 text-zinc-600">
@@ -117,7 +117,7 @@ export default function PublicBeritaGrid({
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-start lg:justify-end">
+                  <div className="flex items-center justify-start pt-1 lg:justify-end lg:pt-0">
                     <span className="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-4 py-2 text-sm font-semibold text-zinc-700 transition group-hover:border-emerald-300 group-hover:text-emerald-800">
                       Baca berita
                       <span aria-hidden="true">&rarr;</span>
@@ -128,7 +128,7 @@ export default function PublicBeritaGrid({
             ))}
           </div>
         ) : (
-          <div className="px-6 py-10 text-sm text-zinc-500 sm:px-8">
+          <div className="px-5 py-8 text-sm text-zinc-500 sm:px-8 sm:py-10">
             Belum ada berita di Firestore.
           </div>
         )}

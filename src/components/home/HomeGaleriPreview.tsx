@@ -69,7 +69,7 @@ export default function HomeGaleriPreview({
       ) : null}
 
       {isLoading ? (
-        <div className="mt-8 rounded-2xl border border-zinc-200 bg-white px-6 py-10 text-sm text-zinc-500">
+        <div className="mt-8 rounded-2xl border border-zinc-200 bg-white px-5 py-8 text-sm text-zinc-500 sm:px-6 sm:py-10">
           Memuat preview galeri...
         </div>
       ) : items.length > 0 ? (
@@ -78,14 +78,14 @@ export default function HomeGaleriPreview({
             <Link
               key={item.id}
               href={`/galeri/${item.id}`}
-              className="flex min-h-56 items-end rounded-xl border border-zinc-200 bg-[linear-gradient(180deg,#dfe8df_0%,#bccbbd_100%)] bg-cover bg-center p-5"
+              className="flex min-h-48 items-end rounded-xl border border-zinc-200 bg-[linear-gradient(180deg,#dfe8df_0%,#bccbbd_100%)] bg-cover bg-center p-4 sm:min-h-56 sm:p-5"
               style={item.imageUrl ? { backgroundImage: `url(${item.imageUrl})` } : undefined}
             >
               <div>
                 <span className="inline-flex rounded-full bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
                   Foto {index + 1}
                 </span>
-                <p className="mt-3 max-w-[12rem] text-lg font-semibold tracking-tight text-zinc-900">
+                <p className="mt-3 max-w-[12rem] text-base font-semibold tracking-tight text-zinc-900 sm:text-lg">
                   {item.title}
                 </p>
               </div>
@@ -93,7 +93,7 @@ export default function HomeGaleriPreview({
           ))}
         </div>
       ) : (
-        <div className="mt-8 rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-10 text-sm text-zinc-500">
+        <div className="mt-8 rounded-2xl border border-dashed border-zinc-300 bg-white px-5 py-8 text-sm text-zinc-500 sm:px-6 sm:py-10">
           Belum ada galeri di Firestore untuk ditampilkan di beranda.
         </div>
       )}

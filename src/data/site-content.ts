@@ -1,9 +1,3 @@
-export const highlights = [
-  { label: "Penduduk", value: "3.250+", detail: "Warga terdata" },
-  { label: "UMKM", value: "48", detail: "Usaha aktif" },
-  { label: "Kegiatan", value: "12", detail: "Agenda bulan ini" },
-];
-
 export const profileCards = [
   {
     title: "Sejarah",

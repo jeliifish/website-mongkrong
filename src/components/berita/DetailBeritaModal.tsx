@@ -46,6 +46,10 @@ export default function DetailBeritaModal({
     return null;
   }
 
+  const visibleContent = berita.content.filter(
+    (paragraph) => paragraph.trim().length > 0 && !isDuplicateSummary(paragraph, berita.description),
+  );
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/45 p-6 backdrop-blur-[2px]">
       <button
@@ -98,16 +102,33 @@ export default function DetailBeritaModal({
           </div>
         </div>
 
-        <div className="grid gap-8 px-8 py-7 lg:grid-cols-[minmax(0,1fr)_16rem]">
-          <div className="space-y-5">
-            {berita.content.map((paragraph) => (
-              <p key={paragraph} className="text-[1.02rem] leading-8 text-zinc-700">
-                {paragraph}
-              </p>
-            ))}
-          </div>
+        <div
+          className={`px-8 py-7 ${
+            visibleContent.length > 0
+              ? "grid gap-8 lg:grid-cols-[minmax(0,1fr)_16rem]"
+              : "border-t border-zinc-200"
+          }`}
+        >
+          {visibleContent.length > 0 ? (
+            <div className="space-y-5">
+              {visibleContent.map((paragraph, index) => (
+                <p
+                  key={`${berita.title}-paragraph-${index}`}
+                  className="text-[1.02rem] leading-8 text-zinc-700"
+                >
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          ) : null}
 
-          <aside className="space-y-5 border-t border-zinc-200 pt-6 lg:border-t-0 lg:border-l lg:pl-8 lg:pt-0">
+          <aside
+            className={`grid gap-5 ${
+              visibleContent.length > 0
+                ? "border-t border-zinc-200 pt-6 lg:border-t-0 lg:border-l lg:pl-8 lg:pt-0"
+                : "sm:grid-cols-2"
+            }`}
+          >
             <div>
               <p className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-zinc-500">
                 Penulis
@@ -121,16 +142,17 @@ export default function DetailBeritaModal({
               </p>
               <p className="mt-2 text-sm font-medium text-zinc-900">{berita.date}</p>
             </div>
-
-            <div>
-              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-zinc-500">
-                Ringkasan
-              </p>
-              <p className="mt-2 text-sm leading-7 text-zinc-600">{berita.description}</p>
-            </div>
           </aside>
         </div>
       </div>
     </div>
   );
+}
+
+function isDuplicateSummary(content: string, description: string) {
+  return normalizeText(content) === normalizeText(description);
+}
+
+function normalizeText(value: string) {
+  return value.trim().replace(/\s+/g, " ");
 }

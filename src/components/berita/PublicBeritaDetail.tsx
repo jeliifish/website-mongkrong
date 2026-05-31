@@ -96,6 +96,10 @@ export default function PublicBeritaDetail({
     );
   }
 
+  const visibleContent = item.content.filter(
+    (paragraph) => paragraph.trim().length > 0 && !isDuplicateSummary(paragraph, item.description),
+  );
+
   return (
     <>
       <section className="rounded-[2rem] border border-zinc-200 bg-white px-8 py-8 shadow-sm sm:px-10 sm:py-10">
@@ -131,20 +135,30 @@ export default function PublicBeritaDetail({
         </div>
       ) : null}
 
-      <section className="mt-8">
-        <article className="rounded-[2rem] border border-zinc-200 bg-white px-8 py-8 shadow-sm sm:px-10">
-          <div className="space-y-6">
-            {item.content.map((paragraph, index) => (
-              <p
-                key={`${item.id}-paragraph-${index}`}
-                className="text-base leading-8 text-zinc-700"
-              >
-                {paragraph}
-              </p>
-            ))}
-          </div>
-        </article>
-      </section>
+      {visibleContent.length > 0 ? (
+        <section className="mt-8">
+          <article className="rounded-[2rem] border border-zinc-200 bg-white px-8 py-8 shadow-sm sm:px-10">
+            <div className="space-y-6">
+              {visibleContent.map((paragraph, index) => (
+                <p
+                  key={`${item.id}-paragraph-${index}`}
+                  className="text-base leading-8 text-zinc-700"
+                >
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          </article>
+        </section>
+      ) : null}
     </>
   );
+}
+
+function isDuplicateSummary(content: string, description: string) {
+  return normalizeText(content) === normalizeText(description);
+}
+
+function normalizeText(value: string) {
+  return value.trim().replace(/\s+/g, " ");
 }

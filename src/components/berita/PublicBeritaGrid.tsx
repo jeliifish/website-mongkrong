@@ -75,10 +75,6 @@ export default function PublicBeritaGrid({
           <h2 className="mt-2 text-xl font-semibold tracking-tight text-zinc-900 sm:text-2xl">
             Pilih berita yang ingin dibaca
           </h2>
-          <p className="mt-2 max-w-3xl text-sm leading-7 text-zinc-600">
-            Setiap item akan membuka halaman detail berita. Untuk sekarang route
-            memakai ID dokumen Firestore, jadi belum perlu field baru khusus URL.
-          </p>
         </div>
 
         {isLoading ? (

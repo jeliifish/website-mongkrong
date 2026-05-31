@@ -73,19 +73,36 @@ export default function HomeGaleriPreview({
           Memuat preview galeri...
         </div>
       ) : items.length > 0 ? (
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div
+          className={`mt-8 grid gap-4 ${
+            items.length === 1
+              ? "grid-cols-1"
+              : items.length === 2
+                ? "sm:grid-cols-2"
+                : items.length === 3
+                  ? "sm:grid-cols-2 lg:grid-cols-3"
+                  : "sm:grid-cols-2 lg:grid-cols-4"
+          }`}
+        >
           {items.map((item, index) => (
             <Link
               key={item.id}
               href={`/galeri/${item.id}`}
-              className="flex min-h-48 items-end rounded-xl border border-zinc-200 bg-[linear-gradient(180deg,#dfe8df_0%,#bccbbd_100%)] bg-cover bg-center p-4 sm:min-h-56 sm:p-5"
+              className={`relative flex items-end overflow-hidden rounded-xl border border-zinc-200 bg-[linear-gradient(180deg,#dfe8df_0%,#bccbbd_100%)] bg-cover bg-center p-4 sm:p-5 ${
+                items.length === 1 ? "min-h-72 sm:min-h-80" : "min-h-48 sm:min-h-56"
+              }`}
               style={item.imageUrl ? { backgroundImage: `url(${item.imageUrl})` } : undefined}
             >
-              <div>
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.04)_0%,rgba(15,23,42,0.18)_45%,rgba(15,23,42,0.72)_100%)]" />
+              <div className="relative z-10 max-w-full rounded-2xl bg-white/14 px-3 py-3 backdrop-blur-[2px]">
                 <span className="inline-flex rounded-full bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
                   Foto {index + 1}
                 </span>
-                <p className="mt-3 max-w-[12rem] text-base font-semibold tracking-tight text-zinc-900 sm:text-lg">
+                <p
+                  className={`mt-3 font-semibold tracking-tight text-white ${
+                    items.length === 1 ? "max-w-2xl text-2xl sm:text-3xl" : "max-w-[14rem] text-base sm:text-lg"
+                  }`}
+                >
                   {item.title}
                 </p>
               </div>

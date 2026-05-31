@@ -19,8 +19,8 @@ export default function GaleriPage() {
             Dokumentasi kegiatan dan suasana desa.
           </h1>
           <p className="mt-5 max-w-3xl text-base leading-8 text-zinc-600">
-            Nanti bagian ini bisa diisi foto-foto kegiatan warga, acara desa,
-            pembangunan, maupun potret lingkungan desa dari dashboard admin.
+            Jelajahi dokumentasi kegiatan warga, acara desa, pembangunan, dan
+            suasana lingkungan Desa Mongkrong dalam galeri ini.
           </p>
         </section>
 

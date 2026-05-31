@@ -27,7 +27,6 @@ const todayFormatter = new Intl.DateTimeFormat("id-ID", {
   day: "numeric",
   month: "long",
   year: "numeric",
-  timeZone: "UTC",
 });
 
 export default function AddBeritaModal({

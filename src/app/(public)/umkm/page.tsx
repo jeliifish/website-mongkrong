@@ -19,8 +19,8 @@ export default function UmkmPage() {
             Produk dan usaha lokal warga desa.
           </h1>
           <p className="mt-5 max-w-3xl text-base leading-8 text-zinc-600">
-            Halaman ini bisa menampilkan daftar UMKM, deskripsi usaha, foto
-            produk, alamat, dan kontak pemilik usaha secara lebih lengkap.
+            Temukan beragam produk dan usaha lokal warga Desa Mongkrong,
+            lengkap dengan informasi singkat, foto, dan detail usahanya.
           </p>
         </section>
 

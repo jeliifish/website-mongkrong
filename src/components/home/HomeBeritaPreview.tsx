@@ -73,20 +73,38 @@ export default function HomeBeritaPreview({
           Memuat preview berita...
         </div>
       ) : items.length > 0 ? (
-        <div className="mt-8 grid gap-5 md:grid-cols-3">
+        <div
+          className={`mt-8 grid gap-5 ${
+            items.length === 1
+              ? "grid-cols-1"
+              : items.length === 2
+                ? "md:grid-cols-2"
+                : "md:grid-cols-3"
+          }`}
+        >
           {items.map((item) => (
             <article
               key={item.id}
-              className="rounded-xl border border-zinc-200 bg-white p-5 sm:p-6"
+              className={`rounded-xl border border-zinc-200 bg-white p-5 sm:p-6 ${
+                items.length === 1 ? "max-w-none" : ""
+              }`}
             >
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
                 {item.category}
               </p>
               <p className="mt-2 text-sm text-zinc-500">{item.date}</p>
-              <h3 className="mt-3 text-lg font-semibold tracking-tight text-zinc-900 sm:text-xl">
+              <h3
+                className={`mt-3 font-semibold tracking-tight text-zinc-900 ${
+                  items.length === 1 ? "text-2xl sm:text-3xl" : "text-lg sm:text-xl"
+                }`}
+              >
                 {item.title}
               </h3>
-              <p className="mt-3 text-sm leading-7 text-zinc-600">
+              <p
+                className={`mt-3 text-zinc-600 ${
+                  items.length === 1 ? "max-w-4xl text-base leading-8" : "text-sm leading-7"
+                }`}
+              >
                 {item.description}
               </p>
               <Link

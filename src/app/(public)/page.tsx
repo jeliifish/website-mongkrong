@@ -3,12 +3,12 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import HomeBeritaPreview from "@/components/home/HomeBeritaPreview";
 import HomeGaleriPreview from "@/components/home/HomeGaleriPreview";
+import HomeHighlights from "@/components/home/HomeHighlights";
 import HomeUmkmPreview from "@/components/home/HomeUmkmPreview";
 import { getFallbackBeritaItems } from "@/lib/berita-public";
 import { getFallbackGaleriItems } from "@/lib/galeri-public";
 import { getFallbackUmkmItems } from "@/lib/umkm-public";
 import {
-  highlights,
   profileCards,
 } from "@/data/site-content";
 
@@ -60,19 +60,11 @@ export default function Home() {
           <div className="absolute inset-x-0 bottom-0 h-4 bg-emerald-700" />
         </section>
 
-        <section className="border-b border-zinc-200 bg-white">
-          <div className="mx-auto grid w-full max-w-7xl gap-4 px-4 py-10 sm:px-6 md:grid-cols-3 lg:px-8">
-            {highlights.map((item) => (
-              <div key={item.label} className="rounded-xl border border-zinc-200 px-5 py-5">
-                <p className="text-sm text-zinc-500">{item.label}</p>
-                <p className="mt-2 text-3xl font-semibold text-emerald-700">
-                  {item.value}
-                </p>
-                <p className="mt-1 text-sm text-zinc-600">{item.detail}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        <HomeHighlights
+          fallbackBeritaCount={fallbackBeritaItems.length}
+          fallbackGaleriCount={fallbackGaleriItems.length}
+          fallbackUmkmCount={fallbackUmkmItems.length}
+        />
 
         <section id="profil" className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
@@ -109,7 +101,7 @@ export default function Home() {
 
         <section id="berita" className="border-y border-zinc-200 bg-[#f8faf8]">
           <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">
                   Berita
@@ -118,10 +110,6 @@ export default function Home() {
                   Kabar terbaru dari desa.
                 </h2>
               </div>
-              <p className="max-w-xl text-sm leading-7 text-zinc-600">
-                Bagian ini nanti bisa diisi dari dashboard admin agar berita
-                dan pengumuman lebih mudah diperbarui.
-              </p>
             </div>
             <div className="mt-6">
               <Link
@@ -137,7 +125,7 @@ export default function Home() {
         </section>
 
         <section id="galeri" className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">
                 Galeri
@@ -146,10 +134,6 @@ export default function Home() {
                 Dokumentasi kegiatan warga.
               </h2>
             </div>
-            <p className="max-w-xl text-sm leading-7 text-zinc-600">
-              Jika nanti foto kegiatan sudah siap, bagian ini tinggal diisi
-              gambar asli dari admin.
-            </p>
           </div>
           <div className="mt-6">
             <Link
@@ -174,8 +158,8 @@ export default function Home() {
                   Produk dan usaha lokal warga.
                 </h2>
                 <p className="mt-4 text-sm leading-7 text-zinc-600">
-                  Bagian ini cocok untuk menampilkan makanan khas, kerajinan,
-                  jasa, atau hasil produksi warga desa.
+                  Jelajahi berbagai produk dan usaha warga Desa Mongkrong untuk
+                  mengenal potensi lokal serta pelaku usaha yang ada di desa.
                 </p>
                 <Link
                   href="/umkm"

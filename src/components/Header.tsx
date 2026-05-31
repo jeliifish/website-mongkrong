@@ -90,7 +90,7 @@ export default function Header({ variant = "overlay" }: HeaderProps) {
               Desa Mongkrong
             </p>
             <p className={`text-sm ${brandSubtextClass}`}>
-              Kalurahan Ngestirejo
+              Kalurahan Sampang
             </p>
           </div>
         </Link>

@@ -24,7 +24,7 @@ export default function Footer() {
                 Desa Mongkrong
               </p>
               <p className="text-sm text-emerald-100/75">
-                Kalurahan Ngestirejo
+                Kalurahan Sampang
               </p>
             </div>
           </div>

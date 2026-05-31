@@ -23,9 +23,9 @@ export default function LoginPage() {
 
           <div className="max-w-[31rem] py-10 lg:py-0">
             <h1 className="text-5xl font-semibold leading-[1.02] tracking-tight text-zinc-950 sm:text-6xl">
-              Sugeng Rawuh,
+              Selamat Datang,
               <br />
-              Mlebet
+              Silahkan Masuk
             </h1>
             <p className="mt-6 max-w-[27rem] text-lg leading-8 text-zinc-500">
               Masuk ke panel admin untuk mengelola berita, galeri, profil, dan

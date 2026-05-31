@@ -92,11 +92,14 @@ function EditBeritaForm({ berita, onClose, onSave }: EditBeritaFormProps) {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    const trimmedDescription = form.description.trim();
+
     onSave({
       ...berita,
       title: form.title.trim(),
-      description: form.description.trim(),
+      description: trimmedDescription,
       date: form.date.trim(),
+      content: trimmedDescription ? [trimmedDescription] : [],
     });
     onClose();
   };

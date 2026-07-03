@@ -111,7 +111,7 @@ export default function HomeGaleriPreview({
         </div>
       ) : (
         <div className="mt-8 rounded-2xl border border-dashed border-zinc-300 bg-white px-5 py-8 text-sm text-zinc-500 sm:px-6 sm:py-10">
-          Belum ada galeri di Firestore untuk ditampilkan di beranda.
+          Belum ada foto galeri yang tersedia untuk ditampilkan di beranda.
         </div>
       )}
     </>

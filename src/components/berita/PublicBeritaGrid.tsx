@@ -133,7 +133,7 @@ export default function PublicBeritaGrid({
           </div>
         ) : (
           <div className="px-5 py-8 text-sm text-zinc-500 sm:px-8 sm:py-10">
-            Belum ada berita di Firestore.
+            Belum ada berita yang tersedia saat ini.
           </div>
         )}
       </section>

@@ -83,8 +83,7 @@ export default function PublicBeritaDetail({
           Artikel yang kamu cari belum tersedia
         </h1>
         <p className="mt-4 max-w-2xl text-base leading-8 text-zinc-600">
-          Bisa jadi artikel sudah dihapus, ID tidak cocok, atau Firestore belum
-          berhasil mengirim data ke halaman publik.
+          Bisa jadi artikel sudah dihapus, ID tidak cocok, atau koneksi database sedang bermasalah.
         </p>
         <Link
           href="/berita"

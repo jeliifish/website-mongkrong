@@ -82,7 +82,7 @@ export default function HomeUmkmPreview({ fallbackItems }: HomeUmkmPreviewProps)
         </div>
       ) : (
         <div className="rounded-2xl border border-dashed border-zinc-300 bg-[#f8faf8] px-5 py-8 text-sm text-zinc-500 sm:px-6 sm:py-10">
-          Belum ada data UMKM di Firestore untuk ditampilkan di beranda.
+          Belum ada data UMKM yang tersedia untuk ditampilkan di beranda.
         </div>
       )}
     </>

@@ -96,7 +96,7 @@ export default function PublicUmkmGrid({ fallbackItems }: PublicUmkmGridProps) {
 
       {!isLoading && items.length === 0 ? (
         <div className="mt-10 rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-12 text-center text-sm text-zinc-500">
-          Belum ada data UMKM di Firestore. Tambahkan dulu lewat halaman admin UMKM.
+          Belum ada data UMKM yang tersedia saat ini.
         </div>
       ) : null}
     </>

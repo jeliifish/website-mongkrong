@@ -1,31 +1,24 @@
 "use client";
 
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 
 import Button from "@/components/Button";
 import DatePicker from "@/components/DatePicker";
-
-type EditBerita = {
-  id: string;
-  title: string;
-  description: string;
-  date: string;
-  category: string;
-  author: string;
-  content: string[];
-};
+import type { BeritaItem } from "@/types/berita";
 
 type EditBeritaModalProps = {
-  berita: EditBerita | null;
+  berita: BeritaItem | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (berita: EditBerita) => void;
+  onSave: (berita: BeritaItem & { file?: File | null }) => void;
 };
 
 type FormState = {
   title: string;
   description: string;
   date: string;
+  author: string;
+  category: string;
 };
 
 export default function EditBeritaModal({
@@ -73,24 +66,36 @@ export default function EditBeritaModal({
 }
 
 type EditBeritaFormProps = {
-  berita: EditBerita;
+  berita: BeritaItem;
   onClose: () => void;
-  onSave: (berita: EditBerita) => void;
+  onSave: (berita: BeritaItem & { file?: File | null }) => void;
 };
 
 function EditBeritaForm({ berita, onClose, onSave }: EditBeritaFormProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState<FormState>({
     title: berita.title,
     description: berita.description,
     date: berita.date,
+    author: berita.author,
+    category: berita.category,
   });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleChange = (field: keyof FormState, value: string) => {
     setForm((current) => ({ ...current, [field]: value }));
   };
 
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSelectedFile(event.target.files?.[0] ?? null);
+  };
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!form.title.trim() || !form.description.trim()) {
+      return;
+    }
 
     const trimmedDescription = form.description.trim();
 
@@ -99,7 +104,10 @@ function EditBeritaForm({ berita, onClose, onSave }: EditBeritaFormProps) {
       title: form.title.trim(),
       description: trimmedDescription,
       date: form.date.trim(),
+      author: form.author.trim() || "Admin Desa",
+      category: form.category.trim() || "Informasi Desa",
       content: trimmedDescription ? [trimmedDescription] : [],
+      file: selectedFile,
     });
     onClose();
   };
@@ -118,7 +126,7 @@ function EditBeritaForm({ berita, onClose, onSave }: EditBeritaFormProps) {
             Perbarui data berita
           </h2>
           <p className="text-sm leading-7 text-zinc-600">
-            Ubah judul, deskripsi, dan tanggal berita sebelum disimpan.
+            Ubah judul, deskripsi, tanggal, penulis, dan foto utama berita.
           </p>
         </div>
 
@@ -154,11 +162,37 @@ function EditBeritaForm({ berita, onClose, onSave }: EditBeritaFormProps) {
             />
           </Field>
 
-          <Field label="Deskripsi Berita">
+          <div className="grid gap-6 sm:grid-cols-2">
+            <Field label="Penulis (Author)">
+              <input
+                type="text"
+                value={form.author}
+                onChange={(event) => handleChange("author", event.target.value)}
+                placeholder="Masukkan nama penulis/lembaga"
+                className="h-12 w-full border border-zinc-200 px-4 text-sm text-zinc-800 outline-none transition focus:border-emerald-500"
+              />
+            </Field>
+
+            <Field label="Kategori Berita">
+              <select
+                value={form.category}
+                onChange={(event) => handleChange("category", event.target.value)}
+                className="h-12 w-full border border-zinc-200 px-4 text-sm text-zinc-800 bg-white outline-none transition focus:border-emerald-500"
+              >
+                <option value="Informasi Desa">Informasi Desa</option>
+                <option value="Kegiatan Warga">Kegiatan Warga</option>
+                <option value="Kesehatan">Kesehatan</option>
+                <option value="UMKM">UMKM</option>
+                <option value="Pendidikan">Pendidikan</option>
+              </select>
+            </Field>
+          </div>
+
+          <Field label="Deskripsi & Isi Berita">
             <textarea
               value={form.description}
               onChange={(event) => handleChange("description", event.target.value)}
-              rows={6}
+              rows={8}
               className="w-full resize-none border border-zinc-200 px-4 py-3 text-sm leading-7 text-zinc-800 outline-none transition focus:border-emerald-500"
             />
           </Field>
@@ -169,6 +203,41 @@ function EditBeritaForm({ berita, onClose, onSave }: EditBeritaFormProps) {
               onChange={(value) => handleChange("date", value)}
             />
           </Field>
+
+          <div className="space-y-2">
+            <span className="text-[0.72rem] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+              Foto Utama Berita
+            </span>
+
+            <input
+              ref={inputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              className="flex min-h-32 w-full items-center gap-5 border border-dashed border-zinc-300 bg-zinc-50 px-5 py-5 text-left transition hover:border-emerald-400 hover:bg-emerald-50/40"
+            >
+              <div
+                className="h-20 w-20 shrink-0 rounded-2xl bg-[linear-gradient(180deg,#d7e5d8_0%,#96c498_100%)] bg-cover bg-center"
+                style={berita.imageUrl ? { backgroundImage: `url(${berita.imageUrl})` } : undefined}
+              />
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-zinc-900">
+                  {selectedFile ? selectedFile.name : "Pilih foto pengganti"}
+                </p>
+                <p className="text-xs text-zinc-500">
+                  {selectedFile
+                    ? "File baru akan menggantikan foto saat ini"
+                    : berita.fileName ?? "Belum ada foto berita"}
+                </p>
+              </div>
+            </button>
+          </div>
         </div>
       </div>
 

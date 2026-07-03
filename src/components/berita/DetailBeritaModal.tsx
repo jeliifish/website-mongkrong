@@ -1,18 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-
-type DetailBerita = {
-  title: string;
-  description: string;
-  date: string;
-  category: string;
-  author: string;
-  content: string[];
-};
+import type { BeritaItem } from "@/types/berita";
 
 type DetailBeritaModalProps = {
-  berita: DetailBerita | null;
+  berita: BeritaItem | null;
   isOpen: boolean;
   onClose: () => void;
 };
@@ -103,27 +95,35 @@ export default function DetailBeritaModal({
         </div>
 
         <div
-          className={`px-8 py-7 ${
+          className={`px-8 py-7 max-h-[60vh] overflow-y-auto ${
             visibleContent.length > 0
               ? "grid gap-8 lg:grid-cols-[minmax(0,1fr)_16rem]"
               : "border-t border-zinc-200"
           }`}
         >
-          {visibleContent.length > 0 ? (
-            <div className="space-y-5">
-              {visibleContent.map((paragraph, index) => (
-                <p
-                  key={`${berita.title}-paragraph-${index}`}
-                  className="text-[1.02rem] leading-8 text-zinc-700"
-                >
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-          ) : null}
+          <div className="space-y-5">
+            {berita.imageUrl && (
+              <div
+                className="h-64 rounded-2xl bg-cover bg-center mb-6"
+                style={{ backgroundImage: `url(${berita.imageUrl})` }}
+              />
+            )}
+            {visibleContent.length > 0 && (
+              <div className="space-y-5">
+                {visibleContent.map((paragraph, index) => (
+                  <p
+                    key={`${berita.title}-paragraph-${index}`}
+                    className="text-[1.02rem] leading-8 text-zinc-700"
+                  >
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+            )}
+          </div>
 
           <aside
-            className={`grid gap-5 ${
+            className={`grid gap-5 h-fit ${
               visibleContent.length > 0
                 ? "border-t border-zinc-200 pt-6 lg:border-t-0 lg:border-l lg:pl-8 lg:pt-0"
                 : "sm:grid-cols-2"

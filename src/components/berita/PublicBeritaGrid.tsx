@@ -99,16 +99,24 @@ export default function PublicBeritaGrid({
 
                   <div className="min-w-0">
                     <div className="flex items-start gap-3">
-                      <span className="mt-0.5 text-sm font-semibold text-emerald-700">
+                      <span className="mt-0.5 text-sm font-semibold text-emerald-700 shrink-0">
                         {String(index + 1).padStart(2, "0")}
                       </span>
-                      <div className="min-w-0">
-                        <h3 className="text-xl font-semibold tracking-tight text-zinc-900 transition group-hover:text-emerald-800 sm:text-2xl">
-                          {item.title}
-                        </h3>
-                        <p className="mt-3 max-w-3xl text-sm leading-7 text-zinc-600">
-                          {item.description}
-                        </p>
+                      <div className="flex-1 flex flex-col sm:flex-row gap-5 min-w-0">
+                        {item.imageUrl && (
+                          <div
+                            className="h-20 w-32 shrink-0 rounded-xl bg-cover bg-center border border-zinc-100 hidden sm:block"
+                            style={{ backgroundImage: `url(${item.imageUrl})` }}
+                          />
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-xl font-semibold tracking-tight text-zinc-900 transition group-hover:text-emerald-800 sm:text-2xl">
+                            {item.title}
+                          </h3>
+                          <p className="mt-3 max-w-3xl text-sm leading-7 text-zinc-600 line-clamp-2">
+                            {item.description}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>

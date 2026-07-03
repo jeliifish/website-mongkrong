@@ -12,8 +12,10 @@ import {
   removeBeritaItem,
   updateBeritaItem,
 } from "@/lib/berita-firestore";
+import { createGaleriItem } from "@/lib/galeri-firestore";
 import { isFirebaseConfigured, missingFirebaseConfigKeys } from "@/lib/firebase";
-import type { BeritaItem, NewBeritaInput } from "@/types/berita";
+import { isCloudinaryConfigured, getMissingCloudinaryConfig, uploadImageToCloudinary } from "@/lib/cloudinary-upload";
+import type { BeritaItem } from "@/types/berita";
 
 import AddBeritaModal from "./AddBeritaModal";
 import DetailBeritaModal from "./DetailBeritaModal";
@@ -81,7 +83,7 @@ export default function BeritaTableSection({ items }: BeritaTableSectionProps) {
       return true;
     }
 
-    return [item.title, item.description, item.date].some((value) =>
+    return [item.title, item.description, item.date, item.author, item.category].some((value) =>
       value.toLowerCase().includes(query),
     );
   });
@@ -96,12 +98,21 @@ export default function BeritaTableSection({ items }: BeritaTableSectionProps) {
   const tableRows = paginatedItems.map((row) => ({
     id: row.id,
     cells: [
-      <span key="title" className="font-semibold text-zinc-900">
+      <div key="photo" className="flex items-center py-1">
+        <div
+          className="h-12 w-12 rounded-2xl bg-[linear-gradient(180deg,#d7e5d8_0%,#96c498_100%)] bg-cover bg-center"
+          style={row.imageUrl ? { backgroundImage: `url(${row.imageUrl})` } : undefined}
+        />
+      </div>,
+      <span key="title" className="font-semibold text-zinc-900 truncate max-w-[200px]" title={row.title}>
         {row.title}
       </span>,
-      <p key="description" className="max-w-[42rem] leading-7 text-zinc-600">
-        {row.description}
-      </p>,
+      <span key="category" className="text-zinc-600">
+        {row.category}
+      </span>,
+      <span key="author" className="text-zinc-600">
+        {row.author}
+      </span>,
       <span key="date" className="text-zinc-500">
         {row.date}
       </span>,
@@ -113,11 +124,17 @@ export default function BeritaTableSection({ items }: BeritaTableSectionProps) {
     ],
   }));
 
-  const handleSaveEdit = async (updatedBerita: BeritaItem) => {
+  const handleSaveEdit = async (updatedBerita: BeritaItem & { file?: File | null }) => {
     const previousItems = beritaItems;
 
+    const optimisticItem: BeritaItem = {
+      ...updatedBerita,
+      imageUrl: updatedBerita.file ? URL.createObjectURL(updatedBerita.file) : updatedBerita.imageUrl,
+      fileName: updatedBerita.file ? updatedBerita.file.name : updatedBerita.fileName,
+    };
+
     setBeritaItems((current) =>
-      current.map((item) => (item.id === updatedBerita.id ? updatedBerita : item)),
+      current.map((item) => (item.id === optimisticItem.id ? optimisticItem : item)),
     );
 
     if (!isFirebaseConfigured) {
@@ -125,7 +142,17 @@ export default function BeritaTableSection({ items }: BeritaTableSectionProps) {
     }
 
     try {
-      const savedItem = await updateBeritaItem(updatedBerita);
+      const uploadedImage =
+        updatedBerita.file && isCloudinaryConfigured("berita")
+          ? await uploadImageToCloudinary(updatedBerita.file, "berita")
+          : undefined;
+
+      const savedItem = await updateBeritaItem({
+        ...updatedBerita,
+        imageUrl: uploadedImage?.imageUrl ?? updatedBerita.imageUrl,
+        imagePublicId: uploadedImage?.imagePublicId ?? updatedBerita.imagePublicId,
+        fileName: uploadedImage?.fileName ?? updatedBerita.fileName,
+      });
 
       setBeritaItems((current) =>
         current.map((item) => (item.id === savedItem.id ? savedItem : item)),
@@ -141,10 +168,22 @@ export default function BeritaTableSection({ items }: BeritaTableSectionProps) {
     title,
     description,
     date,
-  }: NewBeritaInput) => {
+    author,
+    category,
+    file,
+  }: {
+    title: string;
+    description: string;
+    date: string;
+    author: string;
+    category: string;
+    file: File | null;
+  }) => {
     const trimmedTitle = title.trim();
     const trimmedDescription = description.trim();
     const trimmedDate = date.trim();
+    const trimmedAuthor = author.trim() || "Admin Desa";
+    const trimmedCategory = category.trim() || "Informasi Desa";
 
     if (!trimmedTitle || !trimmedDescription || !trimmedDate) {
       return;
@@ -155,9 +194,11 @@ export default function BeritaTableSection({ items }: BeritaTableSectionProps) {
       title: trimmedTitle,
       description: trimmedDescription,
       date: trimmedDate,
-      category: "Informasi Desa",
-      author: "Admin Desa",
+      category: trimmedCategory,
+      author: trimmedAuthor,
       content: [trimmedDescription],
+      imageUrl: file ? URL.createObjectURL(file) : undefined,
+      fileName: file?.name,
     };
 
     if (!isFirebaseConfigured) {
@@ -168,11 +209,35 @@ export default function BeritaTableSection({ items }: BeritaTableSectionProps) {
     }
 
     try {
+      const uploadedImage =
+        file && isCloudinaryConfigured("berita")
+          ? await uploadImageToCloudinary(file, "berita")
+          : undefined;
+
       const createdItem = await createBeritaItem({
         title: trimmedTitle,
         description: trimmedDescription,
         date: trimmedDate,
+        author: trimmedAuthor,
+        category: trimmedCategory,
+        imageUrl: uploadedImage?.imageUrl,
+        imagePublicId: uploadedImage?.imagePublicId,
+        fileName: uploadedImage?.fileName ?? file?.name,
       });
+
+      // Auto-sync to Galeri if an image was uploaded
+      if (uploadedImage?.imageUrl) {
+        try {
+          await createGaleriItem({
+            title: trimmedTitle,
+            imageUrl: uploadedImage.imageUrl,
+            imagePublicId: uploadedImage.imagePublicId,
+            fileName: uploadedImage.fileName ?? file?.name,
+          });
+        } catch (err) {
+          console.error("Gagal sinkronisasi ke galeri:", err);
+        }
+      }
 
       setBeritaItems((current) => [createdItem, ...current]);
       setCurrentPage(1);
@@ -214,7 +279,7 @@ export default function BeritaTableSection({ items }: BeritaTableSectionProps) {
         <div className="border-b border-zinc-200/80 pb-5">
           <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_18rem] xl:items-center">
             <SearchBar
-              placeholder="Cari berita atau pengumuman"
+              placeholder="Cari berita berdasarkan judul, kategori, atau penulis"
               className="w-full max-w-2xl"
               value={searchQuery}
               onChange={(value) => {
@@ -252,6 +317,15 @@ export default function BeritaTableSection({ items }: BeritaTableSectionProps) {
             </div>
           ) : null}
 
+          {isFirebaseConfigured && !isCloudinaryConfigured("berita") ? (
+            <div className="mt-4 border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
+              Upload gambar berita ke Cloudinary belum lengkap.
+              <span className="block pt-1 text-amber-800">
+                Key yang belum diisi: {getMissingCloudinaryConfig("berita").join(", ")}
+              </span>
+            </div>
+          ) : null}
+
           {syncError ? (
             <div className="mt-4 border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-800">
               {syncError}
@@ -262,13 +336,15 @@ export default function BeritaTableSection({ items }: BeritaTableSectionProps) {
         <section className="mt-1 flex min-h-0 flex-1 flex-col">
           <Table
             columns={[
+              { label: "Foto" },
               { label: "Judul" },
-              { label: "Deskripsi" },
+              { label: "Kategori" },
+              { label: "Penulis" },
               { label: "Tanggal" },
               { label: "Aksi", className: "text-right" },
             ]}
             rows={tableRows}
-            gridTemplate="1.2fr 2.4fr 0.9fr 0.5fr"
+            gridTemplate="0.6fr 2fr 1.2fr 1.2fr 1fr 0.8fr"
             scrollable
             className="h-full"
             emptyMessage={

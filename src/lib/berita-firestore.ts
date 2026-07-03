@@ -24,6 +24,9 @@ type BeritaDocument = {
   category?: string;
   author?: string;
   content?: string[];
+  imageUrl?: string;
+  imagePublicId?: string;
+  fileName?: string;
   createdAt?: number;
   updatedAt?: number;
 };
@@ -48,6 +51,9 @@ function toBeritaItem(id: string, data: BeritaDocument): BeritaItem {
     author: data.author?.trim() ?? DEFAULT_AUTHOR,
     content:
       data.content?.filter((paragraph) => paragraph.trim().length > 0) ?? [description],
+    imageUrl: data.imageUrl?.trim() || undefined,
+    imagePublicId: data.imagePublicId?.trim() || undefined,
+    fileName: data.fileName?.trim() || undefined,
   };
 }
 
@@ -59,8 +65,8 @@ function toBeritaPayload(input: NewBeritaInput | BeritaItem) {
     "content" in input && input.content.length > 0
       ? input.content
       : [description].filter(Boolean);
-  const category = "category" in input ? input.category.trim() : DEFAULT_CATEGORY;
-  const author = "author" in input ? input.author.trim() : DEFAULT_AUTHOR;
+  const category = input.category ? input.category.trim() : DEFAULT_CATEGORY;
+  const author = input.author ? input.author.trim() : DEFAULT_AUTHOR;
 
   return {
     title,
@@ -69,6 +75,9 @@ function toBeritaPayload(input: NewBeritaInput | BeritaItem) {
     category,
     author,
     content,
+    imageUrl: input.imageUrl?.trim() || "",
+    imagePublicId: input.imagePublicId?.trim() || "",
+    fileName: input.fileName?.trim() || "",
     updatedAt: Date.now(),
   };
 }

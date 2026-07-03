@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 
 import Button from "@/components/Button";
 import DatePicker from "@/components/DatePicker";
@@ -9,6 +9,9 @@ type NewBerita = {
   title: string;
   description: string;
   date: string;
+  author: string;
+  category: string;
+  file: File | null;
 };
 
 type AddBeritaModalProps = {
@@ -21,6 +24,8 @@ type FormState = {
   title: string;
   description: string;
   date: string;
+  author: string;
+  category: string;
 };
 
 const todayFormatter = new Intl.DateTimeFormat("id-ID", {
@@ -76,23 +81,38 @@ function AddBeritaForm({
   onClose,
   onSave,
 }: Omit<AddBeritaModalProps, "isOpen">) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState<FormState>({
     title: "",
     description: "",
     date: todayFormatter.format(new Date()),
+    author: "Admin Desa",
+    category: "Informasi Desa",
   });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleChange = (field: keyof FormState, value: string) => {
     setForm((current) => ({ ...current, [field]: value }));
   };
 
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSelectedFile(event.target.files?.[0] ?? null);
+  };
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!form.title.trim() || !form.description.trim()) {
+      return;
+    }
 
     onSave({
       title: form.title.trim(),
       description: form.description.trim(),
       date: form.date.trim(),
+      author: form.author.trim() || "Admin Desa",
+      category: form.category.trim() || "Informasi Desa",
+      file: selectedFile,
     });
     onClose();
   };
@@ -111,7 +131,7 @@ function AddBeritaForm({
             Tambah berita baru
           </h2>
           <p className="text-sm leading-7 text-zinc-600">
-            Isi judul, deskripsi, dan tanggal berita sebelum dipublikasikan.
+            Isi judul, deskripsi, tanggal, penulis, dan foto utama berita.
           </p>
         </div>
 
@@ -148,12 +168,38 @@ function AddBeritaForm({
             />
           </Field>
 
-          <Field label="Deskripsi Berita">
+          <div className="grid gap-6 sm:grid-cols-2">
+            <Field label="Penulis (Author)">
+              <input
+                type="text"
+                value={form.author}
+                onChange={(event) => handleChange("author", event.target.value)}
+                placeholder="Masukkan nama penulis/lembaga"
+                className="h-12 w-full border border-zinc-200 px-4 text-sm text-zinc-800 outline-none transition focus:border-emerald-500"
+              />
+            </Field>
+
+            <Field label="Kategori Berita">
+              <select
+                value={form.category}
+                onChange={(event) => handleChange("category", event.target.value)}
+                className="h-12 w-full border border-zinc-200 px-4 text-sm text-zinc-800 bg-white outline-none transition focus:border-emerald-500"
+              >
+                <option value="Informasi Desa">Informasi Desa</option>
+                <option value="Kegiatan Warga">Kegiatan Warga</option>
+                <option value="Kesehatan">Kesehatan</option>
+                <option value="UMKM">UMKM</option>
+                <option value="Pendidikan">Pendidikan</option>
+              </select>
+            </Field>
+          </div>
+
+          <Field label="Deskripsi & Isi Berita">
             <textarea
               value={form.description}
               onChange={(event) => handleChange("description", event.target.value)}
-              placeholder="Tulis deskripsi singkat berita"
-              rows={6}
+              placeholder="Tulis deskripsi singkat atau artikel lengkap berita di sini"
+              rows={8}
               className="w-full resize-none border border-zinc-200 px-4 py-3 text-sm leading-7 text-zinc-800 outline-none transition focus:border-emerald-500"
             />
           </Field>
@@ -164,6 +210,49 @@ function AddBeritaForm({
               onChange={(value) => handleChange("date", value)}
             />
           </Field>
+
+          <div className="space-y-2">
+            <span className="text-[0.72rem] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+              Foto Utama Berita
+            </span>
+
+            <input
+              ref={inputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              className="flex min-h-32 w-full items-center gap-5 border border-dashed border-zinc-300 bg-zinc-50 px-5 py-5 text-left transition hover:border-emerald-400 hover:bg-emerald-50/40"
+            >
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  className="h-6 w-6"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.9"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 16V5" />
+                  <path d="m7 10 5-5 5 5" />
+                  <path d="M5 19h14" />
+                </svg>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-zinc-900">
+                  {selectedFile ? selectedFile.name : "Pilih foto utama berita"}
+                </p>
+                <p className="text-xs text-zinc-500">Format JPG, PNG, atau WEBP</p>
+              </div>
+            </button>
+          </div>
         </div>
       </div>
 

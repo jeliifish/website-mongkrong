@@ -7,6 +7,9 @@ import Button from "@/components/Button";
 type NewUmkm = {
   name: string;
   owner: string;
+  description?: string;
+  address?: string;
+  phone?: string;
   file: File | null;
 };
 
@@ -63,6 +66,9 @@ function AddUmkmForm({ onClose, onSave }: Omit<AddUmkmModalProps, "isOpen">) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState("");
   const [owner, setOwner] = useState("");
+  const [description, setDescription] = useState("");
+  const [address, setAddress] = useState("");
+  const [phone, setPhone] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -75,6 +81,9 @@ function AddUmkmForm({ onClose, onSave }: Omit<AddUmkmModalProps, "isOpen">) {
     onSave({
       name: name.trim(),
       owner: owner.trim(),
+      description: description.trim() || undefined,
+      address: address.trim() || undefined,
+      phone: phone.trim() || undefined,
       file: selectedFile,
     });
     onClose();
@@ -102,7 +111,7 @@ function AddUmkmForm({ onClose, onSave }: Omit<AddUmkmModalProps, "isOpen">) {
         <CloseButton onClick={onClose} />
       </div>
 
-      <div className="space-y-6 px-8 py-7">
+      <div className="max-h-[60vh] overflow-y-auto space-y-6 px-8 py-7">
         <Field label="Nama Usaha">
           <input
             type="text"
@@ -119,6 +128,36 @@ function AddUmkmForm({ onClose, onSave }: Omit<AddUmkmModalProps, "isOpen">) {
             value={owner}
             onChange={(event) => setOwner(event.target.value)}
             placeholder="Masukkan nama pemilik"
+            className="h-12 w-full border border-zinc-200 px-4 text-sm text-zinc-800 outline-none transition focus:border-emerald-500"
+          />
+        </Field>
+
+        <Field label="Deskripsi Usaha">
+          <textarea
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            placeholder="Masukkan deskripsi usaha atau produk yang dijual"
+            rows={3}
+            className="w-full border border-zinc-200 p-4 text-sm text-zinc-800 outline-none transition focus:border-emerald-500 resize-none"
+          />
+        </Field>
+
+        <Field label="Alamat Usaha">
+          <input
+            type="text"
+            value={address}
+            onChange={(event) => setAddress(event.target.value)}
+            placeholder="Contoh: RT 02/RW 03, Dusun Mongkrong"
+            className="h-12 w-full border border-zinc-200 px-4 text-sm text-zinc-800 outline-none transition focus:border-emerald-500"
+          />
+        </Field>
+
+        <Field label="No. WhatsApp">
+          <input
+            type="text"
+            value={phone}
+            onChange={(event) => setPhone(event.target.value)}
+            placeholder="Contoh: 08123456789"
             className="h-12 w-full border border-zinc-200 px-4 text-sm text-zinc-800 outline-none transition focus:border-emerald-500"
           />
         </Field>

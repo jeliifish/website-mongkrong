@@ -116,10 +116,16 @@ export default function UmkmTableSection({ items }: UmkmTableSectionProps) {
   const handleAddUmkm = async ({
     name,
     owner,
+    description,
+    address,
+    phone,
     file,
   }: {
     name: string;
     owner: string;
+    description?: string;
+    address?: string;
+    phone?: string;
     file: File | null;
   }) => {
     if (!name.trim() || !owner.trim()) {
@@ -132,6 +138,9 @@ export default function UmkmTableSection({ items }: UmkmTableSectionProps) {
           id: `umkm-${Date.now()}`,
           name,
           owner,
+          description,
+          address,
+          phone,
           imageUrl: file ? URL.createObjectURL(file) : undefined,
           fileName: file?.name,
         },
@@ -150,6 +159,9 @@ export default function UmkmTableSection({ items }: UmkmTableSectionProps) {
       const createdItem = await createUmkmItem({
         name,
         owner,
+        description,
+        address,
+        phone,
         imageUrl: uploadedImage?.imageUrl,
         imagePublicId: uploadedImage?.imagePublicId,
         fileName: uploadedImage?.fileName ?? file?.name,

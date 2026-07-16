@@ -2,135 +2,19 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
+import { useAuth } from "@/components/AuthProvider";
 import { fetchBeritaItems } from "@/lib/berita-firestore";
 import { isFirebaseConfigured, missingFirebaseConfigKeys } from "@/lib/firebase";
 import { fetchGaleriItems } from "@/lib/galeri-firestore";
 import { fetchUmkmItems } from "@/lib/umkm-firestore";
-import type { BeritaItem } from "@/types/berita";
-import type { GaleriItem } from "@/types/galeri";
-import type { UmkmItem } from "@/types/umkm";
-
-type SummaryCard = {
-  label: string;
-  value: string;
-  detail: string;
-};
-
-type ActivityRow = {
-  section: string;
-  title: string;
-  field: string;
-  time: string;
-};
-
-const quickActions = [
-  {
-    title: "Kelola berita desa",
-    description: "Tambah atau perbarui judul, deskripsi, dan tanggal berita.",
-    href: "/admin/berita",
-  },
-  {
-    title: "Tambah foto galeri",
-    description: "Unggah judul gambar dan dokumentasi foto kegiatan terbaru.",
-    href: "/admin/galeri",
-  },
-  {
-    title: "Kelola UMKM",
-    description: "Perbarui nama usaha, pemilik, dan foto UMKM warga.",
-    href: "/admin/umkm",
-  },
-  {
-    title: "Edit profil desa",
-    description: "Sesuaikan sejarah desa, visi misi, dan potensi unggulan.",
-    href: "/admin/profil",
-  },
-];
-
-function createSummaryCards(
-  beritaItems: BeritaItem[],
-  galeriItems: GaleriItem[],
-  umkmItems: UmkmItem[],
-): SummaryCard[] {
-  return [
-    {
-      label: "Berita",
-      value: String(beritaItems.length),
-      detail: `${beritaItems.length} judul berita siap dikelola`,
-    },
-    {
-      label: "Galeri",
-      value: String(galeriItems.length),
-      detail: `${galeriItems.length} item foto tersedia`,
-    },
-    {
-      label: "UMKM",
-      value: String(umkmItems.length),
-      detail: `${umkmItems.length} data usaha warga aktif`,
-    },
-    {
-      label: "Profil",
-      value: "4",
-      detail: "4 bagian profil masih memakai data statis",
-    },
-  ];
-}
-
-function createActivityRows(
-  beritaItems: BeritaItem[],
-  galeriItems: GaleriItem[],
-  umkmItems: UmkmItem[],
-): ActivityRow[] {
-  const rows: ActivityRow[] = [];
-
-  const latestBerita = beritaItems[0];
-  const latestGaleri = galeriItems[0];
-  const latestUmkm = umkmItems[0];
-
-  if (latestBerita) {
-    rows.push({
-      section: "Berita",
-      title: latestBerita.title,
-      field: "Judul, deskripsi, tanggal",
-      time: latestBerita.date,
-    });
-  }
-
-  if (latestGaleri) {
-    rows.push({
-      section: "Galeri",
-      title: latestGaleri.title,
-      field: "Judul gambar, upload foto",
-      time: latestGaleri.updated,
-    });
-  }
-
-  if (latestUmkm) {
-    rows.push({
-      section: "UMKM",
-      title: latestUmkm.name,
-      field: "Foto, nama usaha, pemilik",
-      time: latestUmkm.owner,
-    });
-  }
-
-  rows.push({
-    section: "Profil",
-    title: "Sambutan Kepala Desa",
-    field: "Judul bagian, deskripsi",
-    time: "Data statis",
-  });
-
-  return rows;
-}
+import { fetchAdminProfiles } from "@/lib/admin-firestore";
 
 export default function AdminOverviewPanel() {
-  const [summaryCards, setSummaryCards] = useState<SummaryCard[]>(() =>
-    createSummaryCards([], [], []),
-  );
-  const [activityRows, setActivityRows] = useState<ActivityRow[]>(() =>
-    createActivityRows([], [], []),
-  );
+  const { profile } = useAuth();
+  const [beritaCount, setBeritaCount] = useState(0);
+  const [galeriCount, setGaleriCount] = useState(0);
+  const [umkmCount, setUmkmCount] = useState(0);
+  const [userCount, setUserCount] = useState(0);
   const [isLoading, setIsLoading] = useState(() => isFirebaseConfigured);
   const [syncError, setSyncError] = useState<string | null>(null);
 
@@ -146,18 +30,21 @@ export default function AdminOverviewPanel() {
       setSyncError(null);
 
       try {
-        const [beritaItems, galeriItems, umkmItems] = await Promise.all([
+        const [beritaItems, galeriItems, umkmItems, adminItems] = await Promise.all([
           fetchBeritaItems(),
           fetchGaleriItems(),
           fetchUmkmItems(),
+          fetchAdminProfiles(),
         ]);
 
         if (isCancelled) {
           return;
         }
 
-        setSummaryCards(createSummaryCards(beritaItems, galeriItems, umkmItems));
-        setActivityRows(createActivityRows(beritaItems, galeriItems, umkmItems));
+        setBeritaCount(beritaItems.length);
+        setGaleriCount(galeriItems.length);
+        setUmkmCount(umkmItems.length);
+        setUserCount(adminItems.length);
       } catch {
         if (!isCancelled) {
           setSyncError(
@@ -179,22 +66,20 @@ export default function AdminOverviewPanel() {
   }, []);
 
   return (
-    <>
-      <div className="border-b border-zinc-200 pb-6">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">
-          Dashboard
-        </p>
-        <h2 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-950 sm:text-4xl">
-          Ringkasan pengelolaan website desa
+    <div className="space-y-6">
+      {/* Welcome Banner */}
+      <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm md:p-8">
+        <h2 className="text-3xl font-extrabold tracking-tight text-zinc-950 sm:text-4xl">
+          Selamat Datang Kembali, {profile?.name || "admin"}!
         </h2>
-        <p className="mt-3 max-w-3xl text-sm leading-7 text-zinc-600">
-          Pantau update konten, cek data live dari Firebase, dan buka aksi cepat
-          untuk mengelola informasi desa secara efisien.
+        <p className="mt-2 text-sm leading-relaxed text-zinc-500 max-w-3xl">
+          Selamat datang di panel pengelolaan informasi Padukuhan Mongkrong. Di sini Anda dapat
+          memperbarui data profil desa, galeri kegiatan, UMKM warga, dan menerbitkan berita.
         </p>
       </div>
 
       {!isFirebaseConfigured ? (
-        <div className="mt-6 border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
+        <div className="border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900 rounded-2xl">
           Firebase belum aktif untuk dashboard admin.
           {missingFirebaseConfigKeys.length > 0 ? (
             <span className="block pt-1 text-amber-800">
@@ -205,91 +90,248 @@ export default function AdminOverviewPanel() {
       ) : null}
 
       {syncError ? (
-        <div className="mt-6 border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-800">
+        <div className="border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-800 rounded-2xl">
           {syncError}
         </div>
       ) : null}
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {summaryCards.map((item) => (
-          <article
-            key={item.label}
-            className="rounded-3xl border border-zinc-200 bg-[#f9fbf8] px-5 py-5"
-          >
-            <p className="text-sm text-zinc-500">{item.label}</p>
-            <p className="mt-2 text-4xl font-semibold tracking-tight text-emerald-800">
-              {isLoading && isFirebaseConfigured && item.label !== "Profil" ? "..." : item.value}
+      {/* Stats Cards */}
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {/* TOTAL PENGGUNA CMS */}
+        <article className="flex items-center justify-between rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <div>
+            <p className="text-[0.7rem] font-bold uppercase tracking-wider text-zinc-400">
+              Total Pengguna CMS
             </p>
-            <p className="mt-2 text-sm leading-7 text-zinc-600">{item.detail}</p>
-          </article>
-        ))}
+            <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">
+              {isLoading ? "..." : userCount}
+            </p>
+          </div>
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+            <svg
+              viewBox="0 0 24 24"
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+          </div>
+        </article>
+
+        {/* JUMLAH FOTO GALERI */}
+        <article className="flex items-center justify-between rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <div>
+            <p className="text-[0.7rem] font-bold uppercase tracking-wider text-zinc-400">
+              Jumlah Foto Galeri
+            </p>
+            <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">
+              {isLoading ? "..." : galeriCount}
+            </p>
+          </div>
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-50 text-purple-600">
+            <svg
+              viewBox="0 0 24 24"
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <polyline points="21 15 16 10 5 21" />
+            </svg>
+          </div>
+        </article>
+
+        {/* JUMLAH UMKM LOKAL */}
+        <article className="flex items-center justify-between rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <div>
+            <p className="text-[0.7rem] font-bold uppercase tracking-wider text-zinc-400">
+              Jumlah UMKM Lokal
+            </p>
+            <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">
+              {isLoading ? "..." : umkmCount}
+            </p>
+          </div>
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
+            <svg
+              viewBox="0 0 24 24"
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <path d="M16 10a4 4 0 0 1-8 0" />
+            </svg>
+          </div>
+        </article>
+
+        {/* BERITA TERPUBLIKASI */}
+        <article className="flex items-center justify-between rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <div>
+            <p className="text-[0.7rem] font-bold uppercase tracking-wider text-zinc-400">
+              Berita Terpublikasi
+            </p>
+            <p className="mt-2 text-3xl font-bold tracking-tight text-zinc-950">
+              {isLoading ? "..." : beritaCount}
+            </p>
+          </div>
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+            <svg
+              viewBox="0 0 24 24"
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <polyline points="10 9 9 9 8 9" />
+            </svg>
+          </div>
+        </article>
       </div>
 
-      <div className="mt-8 grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <section className="rounded-[2rem] border border-zinc-200 bg-white p-5">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-lg font-semibold text-zinc-950">
-                Aktivitas Konten
-              </p>
-              <p className="mt-1 text-sm text-zinc-500">
-                Ringkasan isi terbaru yang sekarang dipakai di dashboard.
-              </p>
-            </div>
-            <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
-              Live
-            </span>
-          </div>
-
-          <div className="mt-5 overflow-hidden rounded-3xl border border-zinc-200">
-            <div className="grid grid-cols-[0.8fr_1.7fr_1.2fr_0.9fr] gap-3 border-b border-zinc-200 bg-zinc-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">
-              <span>Bagian</span>
-              <span>Konten</span>
-              <span>Field</span>
-              <span>Info</span>
-            </div>
-
-            {activityRows.map((row) => (
-              <div
-                key={`${row.section}-${row.title}`}
-                className="grid grid-cols-[0.8fr_1.7fr_1.2fr_0.9fr] gap-3 border-b border-zinc-100 px-4 py-4 text-sm last:border-b-0"
+      {/* Lower Section */}
+      <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        {/* Panduan Hak Akses Anda */}
+        <section className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+              <svg
+                viewBox="0 0 24 24"
+                className="h-5.5 w-5.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                <span className="font-semibold text-zinc-700">{row.section}</span>
-                <span className="text-zinc-900">{row.title}</span>
-                <span className="text-zinc-600">{row.field}</span>
-                <span className="text-zinc-500">{row.time}</span>
-              </div>
-            ))}
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-zinc-900">Panduan Hak Akses Anda</h3>
           </div>
+
+          <p className="mt-4 text-sm leading-relaxed text-zinc-500">
+            Sebagai pengguna dengan peran <strong className="text-zinc-800">{profile?.role || "Staff Admin"}</strong>, Anda dapat mengakses menu di sidebar sesuai dengan izin yang diberikan. Izin ini dapat diubah sewaktu-waktu oleh Super Admin.
+          </p>
+
+          <ul className="mt-6 space-y-3.5">
+            {(profile?.role === "Super Admin" || profile?.permissions.profil) && (
+              <li className="flex items-start gap-3">
+                <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
+                <span className="text-sm text-zinc-600">
+                  <strong className="text-zinc-800">Kelola Profil</strong>: Mengatur deskripsi, sejarah, visi misi, dan identitas Padukuhan Mongkrong.
+                </span>
+              </li>
+            )}
+
+            {(profile?.role === "Super Admin" || profile?.permissions.galeri) && (
+              <li className="flex items-start gap-3">
+                <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
+                <span className="text-sm text-zinc-600">
+                  <strong className="text-zinc-800">Kelola Galeri</strong>: Mengunggah dokumentasi foto kegiatan padukuhan beserta judul & albumnya.
+                </span>
+              </li>
+            )}
+
+            {(profile?.role === "Super Admin" || profile?.permissions.umkm) && (
+              <li className="flex items-start gap-3">
+                <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
+                <span className="text-sm text-zinc-600">
+                  <strong className="text-zinc-800">Kelola UMKM</strong>: Memperbarui data usaha mikro, produk unggulan, nama pemilik, dan deskripsi produk warga.
+                </span>
+              </li>
+            )}
+
+            {(profile?.role === "Super Admin" || profile?.permissions.berita) && (
+              <li className="flex items-start gap-3">
+                <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
+                <span className="text-sm text-zinc-600">
+                  <strong className="text-zinc-800">Kelola Berita</strong>: Menulis, mengedit, dan menerbitkan artikel berita serta pengumuman penting bagi warga desa.
+                </span>
+              </li>
+            )}
+
+            {profile?.role === "Super Admin" && (
+              <li className="flex items-start gap-3">
+                <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
+                <span className="text-sm text-zinc-600">
+                  <strong className="text-zinc-800">Kelola Pengguna</strong>: Menambahkan akun admin baru, mengelola profil, dan mengatur hak akses modul admin lainnya.
+                </span>
+              </li>
+            )}
+          </ul>
         </section>
 
-        <section className="space-y-6">
-          <div className="rounded-[2rem] border border-zinc-200 bg-[#f9fbf8] p-5">
-            <p className="text-lg font-semibold text-zinc-950">Aksi Cepat</p>
-            <div className="mt-4 space-y-4">
-              {quickActions.map((action) => (
-                <article
-                  key={action.title}
-                  className="rounded-3xl border border-zinc-200 bg-white p-4"
-                >
-                  <p className="text-base font-semibold text-zinc-900">
-                    {action.title}
-                  </p>
-                  <p className="mt-2 text-sm leading-7 text-zinc-600">
-                    {action.description}
-                  </p>
-                  <Link
-                    href={action.href}
-                    className="mt-4 inline-flex text-sm font-semibold text-emerald-700 transition hover:text-emerald-800"
-                  >
-                    Buka menu
-                  </Link>
-                </article>
-              ))}
-            </div>
+        {/* Akses Cepat Publik */}
+        <section className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm flex flex-col">
+          <h3 className="text-lg font-bold text-zinc-900">Akses Cepat Publik</h3>
+          <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+            Buka tab baru untuk melihat hasil tampilan di sisi publik website Padukuhan Mongkrong.
+          </p>
+
+          <div className="mt-6 flex-1 space-y-3">
+            <Link
+              href="/"
+              target="_blank"
+              className="flex items-center justify-between rounded-2xl border border-zinc-100 bg-zinc-50/50 p-4 transition hover:border-zinc-200 hover:bg-zinc-50 hover:shadow-sm"
+            >
+              <span className="text-sm font-semibold text-zinc-800">Beranda Publik</span>
+              <svg
+                viewBox="0 0 24 24"
+                className="h-4.5 w-4.5 text-zinc-400"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="7" y1="17" x2="17" y2="7" />
+                <polyline points="7 7 17 7 17 17" />
+              </svg>
+            </Link>
+
+            <Link
+              href="/profil"
+              target="_blank"
+              className="flex items-center justify-between rounded-2xl border border-zinc-100 bg-zinc-50/50 p-4 transition hover:border-zinc-200 hover:bg-zinc-50 hover:shadow-sm"
+            >
+              <span className="text-sm font-semibold text-zinc-800">Profil Publik</span>
+              <svg
+                viewBox="0 0 24 24"
+                className="h-4.5 w-4.5 text-zinc-400"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="7" y1="17" x2="17" y2="7" />
+                <polyline points="7 7 17 7 17 17" />
+              </svg>
+            </Link>
           </div>
         </section>
       </div>
-    </>
+    </div>
   );
 }

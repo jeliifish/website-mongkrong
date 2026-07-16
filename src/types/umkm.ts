@@ -8,6 +8,7 @@ export type UmkmItem = {
   imageUrl?: string;
   imagePublicId?: string;
   fileName?: string;
+  mapUrl?: string;
 };
 
 export type NewUmkmInput = {
@@ -19,4 +20,5 @@ export type NewUmkmInput = {
   imageUrl?: string;
   imagePublicId?: string;
   fileName?: string;
+  mapUrl?: string;
 };

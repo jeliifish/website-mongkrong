@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { adminNavigation } from "@/components/adminNavigation";
+import { useAuth } from "@/components/AuthProvider";
 
 type AdminTopbarProps = {
   onMenuClick: () => void;
@@ -9,10 +10,16 @@ type AdminTopbarProps = {
 
 export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
   const pathname = usePathname();
+  const { profile } = useAuth();
+  
   const current =
     adminNavigation.find((item) => item.href === pathname) ?? adminNavigation[0];
-  const adminLabel = "Admin Desa";
-  const adminInitials = "AD";
+
+  const adminLabel = profile?.name || "Admin Desa";
+  const adminInitials = profile?.name
+    ? profile.name.slice(0, 2).toUpperCase()
+    : "AD";
+  const adminRole = profile?.role || "Pengelola Website";
 
   return (
     <header className="border-b border-zinc-200 bg-white lg:sticky lg:top-0 lg:z-10">
@@ -43,9 +50,10 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[linear-gradient(135deg,#1f7a4a_0%,#39a86c_100%)] text-xs font-semibold text-white shadow-[0_10px_24px_rgba(31,122,74,0.18)]">
                 {adminInitials}
               </div>
-              <div className="text-right">
-                <p className="text-xs font-semibold text-zinc-900">{adminLabel}</p>
-                <p className="text-[0.72rem] text-zinc-500">Pengelola Website</p>
+              <div className="text-right min-w-0">
+                <p className="text-xs font-semibold text-zinc-900 truncate">{adminLabel}</p>
+                <p className="text-[0.68rem] text-zinc-500 leading-tight">{adminRole}</p>
+                <p className="text-[0.62rem] text-zinc-400 leading-none truncate">{profile?.email || ""}</p>
               </div>
             </div>
           </div>
@@ -61,11 +69,12 @@ export default function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[linear-gradient(135deg,#1f7a4a_0%,#39a86c_100%)] text-sm font-semibold text-white shadow-[0_10px_24px_rgba(31,122,74,0.18)]">
               {adminInitials}
             </div>
-            <div>
-              <p className="text-sm font-semibold text-zinc-900">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-zinc-900 truncate">
                 {adminLabel}
               </p>
-              <p className="text-sm text-zinc-500">Pengelola Website</p>
+              <p className="text-xs text-zinc-500 leading-tight">{adminRole}</p>
+              <p className="text-[0.68rem] text-zinc-400 leading-none truncate">{profile?.email || ""}</p>
             </div>
           </div>
         </div>

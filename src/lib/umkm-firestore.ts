@@ -24,6 +24,7 @@ type UmkmDocument = {
   imageUrl?: string;
   imagePublicId?: string;
   fileName?: string;
+  mapUrl?: string;
   createdAt?: number;
   updatedAt?: number;
 };
@@ -47,6 +48,7 @@ function toUmkmItem(id: string, data: UmkmDocument): UmkmItem {
     imageUrl: data.imageUrl?.trim() || undefined,
     imagePublicId: data.imagePublicId?.trim() || undefined,
     fileName: data.fileName?.trim() || undefined,
+    mapUrl: data.mapUrl?.trim() || undefined,
   };
 }
 
@@ -60,6 +62,7 @@ function toUmkmPayload(input: NewUmkmInput | UmkmItem) {
     imageUrl: input.imageUrl?.trim() || "",
     imagePublicId: input.imagePublicId?.trim() || "",
     fileName: input.fileName?.trim() || "",
+    mapUrl: input.mapUrl?.trim() || "",
     updatedAt: Date.now(),
   };
 }

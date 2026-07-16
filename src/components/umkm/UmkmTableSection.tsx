@@ -126,6 +126,7 @@ export default function UmkmTableSection({ items }: UmkmTableSectionProps) {
     address,
     phone,
     file,
+    mapUrl,
   }: {
     name: string;
     owner: string;
@@ -133,6 +134,7 @@ export default function UmkmTableSection({ items }: UmkmTableSectionProps) {
     address?: string;
     phone?: string;
     file: File | null;
+    mapUrl?: string;
   }) => {
     if (!name.trim() || !owner.trim()) {
       return;
@@ -149,6 +151,7 @@ export default function UmkmTableSection({ items }: UmkmTableSectionProps) {
           phone,
           imageUrl: file ? URL.createObjectURL(file) : undefined,
           fileName: file?.name,
+          mapUrl,
         },
         ...current,
       ]);
@@ -171,6 +174,7 @@ export default function UmkmTableSection({ items }: UmkmTableSectionProps) {
         imageUrl: uploadedImage?.imageUrl,
         imagePublicId: uploadedImage?.imagePublicId,
         fileName: uploadedImage?.fileName ?? file?.name,
+        mapUrl,
       });
 
       setUmkmItems((current) => [createdItem, ...current]);

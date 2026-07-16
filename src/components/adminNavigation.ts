@@ -6,6 +6,12 @@ export const adminNavigation = [
     subtitle: "Ringkasan pengelolaan website desa",
   },
   {
+    label: "Kelola Pengguna",
+    href: "/admin/pengguna",
+    title: "Kelola Pengguna CMS",
+    subtitle: "Kelola profil dan hak akses admin yang terdaftar",
+  },
+  {
     label: "Berita",
     href: "/admin/berita",
     title: "Kelola Berita",

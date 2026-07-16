@@ -39,12 +39,12 @@ export default function Table({
 }: TableProps) {
   return (
     <div
-      className={`overflow-hidden border border-zinc-200 bg-white ${
-        scrollable ? "flex min-h-0 flex-1 flex-col" : ""
+      className={`rounded-3xl border border-zinc-200 bg-white shadow-sm ${
+        scrollable ? "overflow-hidden flex min-h-0 flex-1 flex-col" : ""
       } ${className}`}
     >
       <div
-        className={`grid gap-3 border-b border-zinc-200 bg-white px-6 py-4 text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-zinc-500 ${
+        className={`grid gap-3 border-b border-zinc-200 bg-white px-6 py-4 text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-zinc-500 rounded-t-3xl ${
           scrollable ? "sticky top-0 z-10 shrink-0" : ""
         }`}
         style={{ gridTemplateColumns: gridTemplate }}
@@ -63,7 +63,7 @@ export default function Table({
           rows.map((row) => (
             <div
               key={row.id}
-              className="grid gap-3 border-b border-zinc-100 px-6 py-5 text-sm transition hover:bg-[#f8fbf7] last:border-b-0"
+              className="grid gap-3 border-b border-zinc-100 px-6 py-5 text-sm transition hover:bg-[#f8fbf7] last:border-b-0 last:rounded-b-3xl"
               style={{ gridTemplateColumns: gridTemplate }}
             >
               {row.cells.map((cell, index) => (

@@ -21,6 +21,39 @@ export default function PublicUmkmDetail({
   );
   const [isLoading, setIsLoading] = useState(() => isFirebaseConfigured);
   const [syncError, setSyncError] = useState<string | null>(null);
+  const [resolvedMapSrc, setResolvedMapSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!item?.mapUrl) {
+      setResolvedMapSrc(null);
+      return;
+    }
+
+    const url = item.mapUrl.trim();
+    if (url.includes("maps.app.goo.gl") || url.includes("goo.gl/maps")) {
+      const resolve = async () => {
+        try {
+          const res = await fetch(`/api/resolve-map?url=${encodeURIComponent(url)}`);
+          const data = await res.json();
+          if (data.success && data.resolvedUrl) {
+            const resolved = data.resolvedUrl;
+            const coordsRegex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+            const matchCoords = resolved.match(coordsRegex);
+            if (matchCoords) {
+              setResolvedMapSrc(`https://maps.google.com/maps?q=${matchCoords[1]},${matchCoords[2]}&t=&z=16&ie=UTF8&iwloc=&output=embed`);
+            } else {
+              setResolvedMapSrc(`https://maps.google.com/maps?q=${encodeURIComponent(resolved)}&t=&z=16&ie=UTF8&iwloc=&output=embed`);
+            }
+          }
+        } catch (e) {
+          console.error("Gagal resolve maps url:", e);
+        }
+      };
+      void resolve();
+    } else {
+      setResolvedMapSrc(null);
+    }
+  }, [item?.mapUrl]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -140,6 +173,67 @@ export default function PublicUmkmDetail({
                 {item.description || "Belum ada deskripsi penjelasan untuk usaha ini."}
               </p>
             </div>
+          </article>
+
+          {/* Map Card */}
+          <article className="overflow-hidden rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
+            <h2 className="text-lg font-semibold text-zinc-900 tracking-tight mb-4">Lokasi Usaha</h2>
+            <div className="w-full h-80 overflow-hidden rounded-2xl border border-zinc-100">
+              {(() => {
+                let mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(`${item.name}, ${item.address || "Mongkrong, Sampang, Gedangsari"}`)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+                if (resolvedMapSrc) {
+                  mapSrc = resolvedMapSrc;
+                } else if (item.mapUrl && item.mapUrl.trim()) {
+                  const url = item.mapUrl.trim();
+                  if (url.includes("google.com/maps/embed") || url.includes("output=embed")) {
+                    mapSrc = url;
+                  } else {
+                    const coordsRegex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
+                    const matchCoords = url.match(coordsRegex);
+                    if (matchCoords) {
+                      mapSrc = `https://maps.google.com/maps?q=${matchCoords[1]},${matchCoords[2]}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+                    } else {
+                      const directCoordsRegex = /^(-?\d+\.\d+),\s*(-?\d+\.\d+)$/;
+                      const matchDirectCoords = url.match(directCoordsRegex);
+                      if (matchDirectCoords) {
+                        mapSrc = `https://maps.google.com/maps?q=${matchDirectCoords[1]},${matchDirectCoords[2]}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+                      } else if (url.startsWith("http")) {
+                        // is redirect url, wait for resolvedMapSrc
+                      } else {
+                        mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(url)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+                      }
+                    }
+                  }
+                }
+                return (
+                  <iframe
+                    src={mapSrc}
+                    className="w-full h-full"
+                    style={{ border: 0 }}
+                    allowFullScreen={true}
+                    loading="lazy"
+                  />
+                );
+              })()}
+            </div>
+            {(() => {
+              const googleMapsSearchUrl = item.mapUrl && item.mapUrl.startsWith("http")
+                ? item.mapUrl
+                : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${item.name} ${item.address || ""}`)}`;
+              return (
+                <a
+                  href={googleMapsSearchUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-900 w-full justify-center"
+                >
+                  <svg className="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  Buka di Google Maps
+                </a>
+              );
+            })()}
           </article>
         </div>
 

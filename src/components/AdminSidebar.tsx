@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { adminNavigation } from "@/components/adminNavigation";
 import { auth } from "@/lib/firebase";
+import { useAuth } from "@/components/AuthProvider";
 
 type AdminSidebarProps = {
   isOpen: boolean;
@@ -16,6 +17,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const { profile } = useAuth();
 
   async function handleLogout() {
     setIsSigningOut(true);
@@ -31,6 +33,19 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
       setIsSigningOut(false);
     }
   }
+
+  // Filter allowed navigation items
+  const allowedNavigation = adminNavigation.filter((item) => {
+    if (item.href === "/admin") return true;
+    if (!profile) return false;
+    if (profile.role === "Super Admin") return true;
+    
+    // For Staff Admin, check their module permissions
+    if (item.href === "/admin/pengguna") return false; // Only Super Admin
+    
+    const key = item.href.replace("/admin/", "");
+    return profile.permissions[key as keyof typeof profile.permissions] === true;
+  });
 
   return (
     <>
@@ -81,7 +96,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
 
         <div className="border-t border-zinc-200 px-4 py-5 lg:px-5 lg:py-6">
           <nav className="space-y-2">
-            {adminNavigation.map((item) => {
+            {allowedNavigation.map((item) => {
               const isActive = pathname === item.href;
 
               return (
@@ -89,20 +104,13 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                   key={item.href}
                   href={item.href}
                   onClick={onClose}
-                  className={`flex items-center justify-between rounded-2xl px-4 py-3.5 text-sm font-medium transition ${
+                  className={`flex items-center rounded-2xl px-4 py-3.5 text-sm font-medium transition ${
                     isActive
                       ? "bg-[linear-gradient(135deg,#1f7a4a_0%,#39a86c_100%)] text-white shadow-[0_14px_30px_rgba(31,122,74,0.2)]"
                       : "text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950"
                   }`}
                 >
                   <span>{item.label}</span>
-                  <span
-                    className={`text-[0.62rem] uppercase tracking-[0.22em] ${
-                      isActive ? "text-white/80" : "text-zinc-400"
-                    }`}
-                  >
-                    {isActive ? "ON" : ""}
-                  </span>
                 </Link>
               );
             })}

@@ -71,6 +71,7 @@ function EditUmkmForm({
   const [description, setDescription] = useState(umkm.description ?? "");
   const [address, setAddress] = useState(umkm.address ?? "");
   const [phone, setPhone] = useState(umkm.phone ?? "");
+  const [mapUrl, setMapUrl] = useState(umkm.mapUrl ?? "");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -88,6 +89,7 @@ function EditUmkmForm({
       address: address.trim() || undefined,
       phone: phone.trim() || undefined,
       file: selectedFile,
+      mapUrl: mapUrl.trim() || undefined,
     });
     onClose();
   };
@@ -159,6 +161,16 @@ function EditUmkmForm({
             value={phone}
             onChange={(event) => setPhone(event.target.value)}
             placeholder="Contoh: 08123456789"
+            className="h-12 w-full border border-zinc-200 px-4 text-sm text-zinc-800 outline-none transition focus:border-emerald-500"
+          />
+        </Field>
+
+        <Field label="Link Google Maps Usaha (Opsional)">
+          <input
+            type="text"
+            value={mapUrl}
+            onChange={(event) => setMapUrl(event.target.value)}
+            placeholder="Pesan link Share, koordinat (-7.84,110.51), atau Link Semat"
             className="h-12 w-full border border-zinc-200 px-4 text-sm text-zinc-800 outline-none transition focus:border-emerald-500"
           />
         </Field>

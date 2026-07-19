@@ -27,6 +27,7 @@ export default function AdminPemetaanPage() {
   // Form states
   const [lahanForm, setLahanForm] = useState<{ [key: string]: string }>({});
   const [tanamanForm, setTanamanForm] = useState<{ [key: string]: string }>({});
+  const [editingLahan, setEditingLahan] = useState<{ [key: string]: boolean }>({});
 
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -108,6 +109,7 @@ export default function AdminPemetaanPage() {
       setLahanItems((prev) =>
         prev.map((item) => (item.id === id ? { ...item, area: valueNum } : item))
       );
+      setEditingLahan((prev) => ({ ...prev, [id]: false }));
       setSuccessMessage(`Berhasil memperbarui luas ${id} (lokal).`);
       setTimeout(() => setSuccessMessage(null), 3000);
       return;
@@ -119,6 +121,7 @@ export default function AdminPemetaanPage() {
       setLahanItems((prev) =>
         prev.map((item) => (item.id === id ? { ...item, area: valueNum } : item))
       );
+      setEditingLahan((prev) => ({ ...prev, [id]: false }));
       setSuccessMessage(`Berhasil menyimpan luas lahan ${id} ke database.`);
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch {
@@ -126,6 +129,10 @@ export default function AdminPemetaanPage() {
     } finally {
       setIsSubmitting(null);
     }
+  };
+
+  const handleEditLahanClick = (id: string) => {
+    setEditingLahan((prev) => ({ ...prev, [id]: true }));
   };
 
 
@@ -299,6 +306,7 @@ export default function AdminPemetaanPage() {
               <div className="grid gap-4 sm:grid-cols-3">
                 {lahanItems.map((item) => {
                   const areaVal = lahanForm[item.id] || "0";
+                  const isEditing = !!editingLahan[item.id];
                   return (
                     <div
                       key={item.id}
@@ -315,20 +323,34 @@ export default function AdminPemetaanPage() {
                             id={`area-${item.id}`}
                             type="number"
                             step="any"
+                            disabled={!isEditing}
                             value={areaVal}
                             onChange={(e) => handleLahanChange(item.id, e.target.value)}
-                            className="h-10 w-full rounded-xl border border-zinc-200 px-3 text-xs text-zinc-900 outline-none focus:border-[#1f7a4a] focus:ring-2 focus:ring-[#1f7a4a]/10"
+                            className={`h-10 w-full rounded-xl border px-3 text-xs outline-none transition-all duration-200 ${
+                              isEditing
+                                ? "border-[#1f7a4a] text-zinc-900 bg-white focus:ring-2 focus:ring-[#1f7a4a]/10"
+                                : "border-zinc-200 text-zinc-500 bg-zinc-50/80 cursor-not-allowed"
+                            }`}
                           />
                         </div>
                       </div>
                       <div className="mt-4 pt-3 border-t border-zinc-50 flex justify-end">
-                        <Button
-                          type="button"
-                          disabled={isSubmitting === `lahan-${item.id}`}
-                          onClick={() => handleSaveLahan(item.id)}
-                        >
-                          {isSubmitting === `lahan-${item.id}` ? "Menyimpan..." : "Simpan"}
-                        </Button>
+                        {isEditing ? (
+                          <Button
+                            type="button"
+                            disabled={isSubmitting === `lahan-${item.id}`}
+                            onClick={() => handleSaveLahan(item.id)}
+                          >
+                            {isSubmitting === `lahan-${item.id}` ? "Menyimpan..." : "Simpan"}
+                          </Button>
+                        ) : (
+                          <Button
+                            type="button"
+                            onClick={() => handleEditLahanClick(item.id)}
+                          >
+                            Edit
+                          </Button>
+                        )}
                       </div>
                     </div>
                   );

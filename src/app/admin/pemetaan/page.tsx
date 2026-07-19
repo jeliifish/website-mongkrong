@@ -92,9 +92,7 @@ export default function AdminPemetaanPage() {
     setLahanForm((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleTanamanChange = (id: string, value: string) => {
-    setTanamanForm((prev) => ({ ...prev, [id]: value }));
-  };
+
 
   const handleSaveLahan = async (id: string) => {
     const valueStr = lahanForm[id];
@@ -130,39 +128,7 @@ export default function AdminPemetaanPage() {
     }
   };
 
-  const handleSaveTanaman = async (id: string) => {
-    const valueStr = tanamanForm[id];
-    if (valueStr === undefined) return;
 
-    const valueNum = parseFloat(valueStr);
-    if (isNaN(valueNum) || valueNum < 0) {
-      alert("Produktivitas harus berupa angka positif.");
-      return;
-    }
-
-    if (!isFirebaseConfigured) {
-      setTanamanItems((prev) =>
-        prev.map((item) => (item.id === id ? { ...item, productivityPerHa: valueNum } : item))
-      );
-      setSuccessMessage(`Berhasil memperbarui produktivitas ${id} (lokal).`);
-      setTimeout(() => setSuccessMessage(null), 3000);
-      return;
-    }
-
-    try {
-      setIsSubmitting(`tanaman-${id}`);
-      await updateTanamanItem(id, { productivityPerHa: valueNum });
-      setTanamanItems((prev) =>
-        prev.map((item) => (item.id === id ? { ...item, productivityPerHa: valueNum } : item))
-      );
-      setSuccessMessage(`Berhasil menyimpan produktivitas ${id} ke database.`);
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch {
-      alert("Gagal menyimpan ke database.");
-    } finally {
-      setIsSubmitting(null);
-    }
-  };
 
   // Modal handlers
   const handleOpenAddModal = () => {
@@ -427,9 +393,9 @@ export default function AdminPemetaanPage() {
                             id={`prod-${crop.id}`}
                             type="number"
                             step="any"
+                            disabled
                             value={prodVal}
-                            onChange={(e) => handleTanamanChange(crop.id, e.target.value)}
-                            className="h-10 w-full rounded-xl border border-zinc-200 px-3 text-xs text-zinc-900 outline-none focus:border-[#1f7a4a] focus:ring-2 focus:ring-[#1f7a4a]/10"
+                            className="h-10 w-full rounded-xl border border-zinc-200 px-3 text-xs text-zinc-500 bg-zinc-50/80 cursor-not-allowed outline-none"
                           />
                         </div>
                       </div>
@@ -449,14 +415,6 @@ export default function AdminPemetaanPage() {
                             className="inline-flex h-8 items-center justify-center rounded-lg border border-zinc-200 bg-white px-3 text-[0.7rem] font-semibold text-zinc-700 hover:bg-zinc-50 transition"
                           >
                             Edit
-                          </button>
-                          <button
-                            type="button"
-                            disabled={isSubmitting === `tanaman-${crop.id}`}
-                            onClick={() => handleSaveTanaman(crop.id)}
-                            className="inline-flex h-8 items-center justify-center rounded-lg bg-[linear-gradient(135deg,#1f7a4a_0%,#2fa866_100%)] px-3 text-[0.7rem] font-semibold text-white shadow-sm hover:translate-y-[-0.5px] transition disabled:opacity-50"
-                          >
-                            {isSubmitting === `tanaman-${crop.id}` ? "..." : "Simpan"}
                           </button>
                         </div>
                       </div>

@@ -218,10 +218,10 @@ export default function PublicPemetaanDetail({ item, lahanItems, tanamanItems }:
                           <div>
                             <div className="flex justify-between items-start gap-2">
                               <div>
-                                <span className="text-[0.65rem] font-bold text-emerald-700 uppercase tracking-widest">Komoditas</span>
-                                <h4 className="font-extrabold text-xl text-emerald-950 mt-0.5">{tanaman.name}</h4>
+                                <span className="text-[0.65rem] font-semibold text-emerald-700 uppercase tracking-widest">Komoditas</span>
+                                <h4 className="font-bold text-xl text-emerald-950 mt-0.5">{tanaman.name}</h4>
                               </div>
-                              <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-0.5 text-[0.7rem] font-semibold text-emerald-700 uppercase tracking-wider">
+                              <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-0.5 text-[0.7rem] font-medium text-emerald-700 uppercase tracking-wider">
                                 {landCategory?.name || ""}
                               </span>
                             </div>
@@ -229,26 +229,26 @@ export default function PublicPemetaanDetail({ item, lahanItems, tanamanItems }:
                             <div className="mt-5 space-y-2.5 text-xs text-zinc-500 border-t border-zinc-50 pt-4">
                               <div className="flex justify-between items-center">
                                 <span>Luas Lahan Total ({landCategory?.name || ""}):</span>
-                                <span className="font-semibold text-zinc-700">{formattedGrossArea} Ha</span>
+                                <span className="font-medium text-zinc-700">{formattedGrossArea} Ha</span>
                               </div>
                               <div className="flex justify-between items-center text-emerald-800">
                                 <span>Faktor Koreksi Lahan:</span>
-                                <span className="font-bold">{factorNotes}</span>
+                                <span className="font-semibold">{factorNotes}</span>
                               </div>
                               <div className="flex justify-between items-center bg-emerald-50/40 p-1.5 rounded-lg border border-emerald-100/30">
                                 <span className="font-medium text-emerald-900">Luas Panen Efektif:</span>
-                                <span className="font-bold text-emerald-950">{formattedEffectiveArea} Ha</span>
+                                <span className="font-semibold text-emerald-950">{formattedEffectiveArea} Ha</span>
                               </div>
                               <div className="flex justify-between items-center">
                                 <span>Rata-rata Produktivitas:</span>
-                                <span className="font-bold text-zinc-900">{productivity} Ton/Ha</span>
+                                <span className="font-semibold text-zinc-900">{productivity} Ton/Ha</span>
                               </div>
                             </div>
                           </div>
 
                           <div className="mt-5 pt-4 border-t border-zinc-100 flex items-center justify-between">
-                             <span className="text-xs font-semibold text-emerald-800 uppercase tracking-wider">Estimasi Hasil:</span>
-                            <span className="text-xl font-black text-emerald-950 bg-emerald-50 px-4 py-1.5 rounded-xl border border-emerald-950/5">
+                             <span className="text-xs font-medium text-emerald-800 uppercase tracking-wider">Estimasi Hasil:</span>
+                            <span className="text-xl font-bold text-emerald-950 bg-emerald-50 px-4 py-1.5 rounded-xl border border-emerald-950/5">
                               {formattedHarvest} Ton
                             </span>
                           </div>

@@ -336,20 +336,22 @@ export default function AdminPemetaanPage() {
                       </div>
                       <div className="mt-4 pt-3 border-t border-zinc-50 flex justify-end">
                         {isEditing ? (
-                          <Button
+                          <button
                             type="button"
                             disabled={isSubmitting === `lahan-${item.id}`}
                             onClick={() => handleSaveLahan(item.id)}
+                            className="inline-flex h-9 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#1f7a4a_0%,#2fa866_100%)] px-4 text-xs font-semibold text-white shadow-sm hover:translate-y-[-0.5px] transition disabled:opacity-50"
                           >
                             {isSubmitting === `lahan-${item.id}` ? "Menyimpan..." : "Simpan"}
-                          </Button>
+                          </button>
                         ) : (
-                          <Button
+                          <button
                             type="button"
                             onClick={() => handleEditLahanClick(item.id)}
+                            className="inline-flex h-9 items-center justify-center rounded-xl border border-zinc-200 bg-white px-4 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 transition"
                           >
                             Edit
-                          </Button>
+                          </button>
                         )}
                       </div>
                     </div>

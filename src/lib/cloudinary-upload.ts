@@ -8,15 +8,15 @@ type CloudinaryUploadResponse = {
   secure_url: string;
 };
 
-function getUploadPreset(kind: "umkm" | "galeri") {
+function getUploadPreset(kind: "umkm" | "galeri" | "berita") {
   return kind === "umkm" ? UMKM_PRESET : GALERI_PRESET;
 }
 
-export function isCloudinaryConfigured(kind: "umkm" | "galeri") {
+export function isCloudinaryConfigured(kind: "umkm" | "galeri" | "berita") {
   return Boolean(CLOUDINARY_CLOUD_NAME && getUploadPreset(kind));
 }
 
-export function getMissingCloudinaryConfig(kind: "umkm" | "galeri") {
+export function getMissingCloudinaryConfig(kind: "umkm" | "galeri" | "berita") {
   const missingKeys: string[] = [];
 
   if (!CLOUDINARY_CLOUD_NAME) {
@@ -36,7 +36,7 @@ export function getMissingCloudinaryConfig(kind: "umkm" | "galeri") {
 
 export async function uploadImageToCloudinary(
   file: File,
-  kind: "umkm" | "galeri",
+  kind: "umkm" | "galeri" | "berita",
 ) {
   if (!CLOUDINARY_CLOUD_NAME) {
     throw new Error("Cloudinary cloud name belum diisi.");

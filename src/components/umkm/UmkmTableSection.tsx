@@ -105,6 +105,12 @@ export default function UmkmTableSection({ items }: UmkmTableSectionProps) {
       <span key="owner" className="text-zinc-600">
         {item.owner}
       </span>,
+      <span key="address" className="text-zinc-600 truncate" title={item.address}>
+        {item.address || "-"}
+      </span>,
+      <span key="phone" className="text-zinc-600">
+        {item.phone || "-"}
+      </span>,
     ],
     actions: [
       { label: "Detail", onClick: () => setSelectedUmkm(item) },
@@ -116,11 +122,19 @@ export default function UmkmTableSection({ items }: UmkmTableSectionProps) {
   const handleAddUmkm = async ({
     name,
     owner,
+    description,
+    address,
+    phone,
     file,
+    mapUrl,
   }: {
     name: string;
     owner: string;
+    description?: string;
+    address?: string;
+    phone?: string;
     file: File | null;
+    mapUrl?: string;
   }) => {
     if (!name.trim() || !owner.trim()) {
       return;
@@ -132,8 +146,12 @@ export default function UmkmTableSection({ items }: UmkmTableSectionProps) {
           id: `umkm-${Date.now()}`,
           name,
           owner,
+          description,
+          address,
+          phone,
           imageUrl: file ? URL.createObjectURL(file) : undefined,
           fileName: file?.name,
+          mapUrl,
         },
         ...current,
       ]);
@@ -150,9 +168,13 @@ export default function UmkmTableSection({ items }: UmkmTableSectionProps) {
       const createdItem = await createUmkmItem({
         name,
         owner,
+        description,
+        address,
+        phone,
         imageUrl: uploadedImage?.imageUrl,
         imagePublicId: uploadedImage?.imagePublicId,
         fileName: uploadedImage?.fileName ?? file?.name,
+        mapUrl,
       });
 
       setUmkmItems((current) => [createdItem, ...current]);
@@ -303,10 +325,12 @@ export default function UmkmTableSection({ items }: UmkmTableSectionProps) {
             { label: "Foto" },
             { label: "Nama Usaha" },
             { label: "Pemilik" },
+            { label: "Alamat" },
+            { label: "No. WhatsApp" },
             { label: "Aksi", className: "text-right" },
           ]}
           rows={tableRows}
-          gridTemplate="0.5fr 1.9fr 1.2fr 0.5fr"
+          gridTemplate="0.6fr 1.5fr 1.2fr 1.8fr 1.3fr 0.8fr"
           scrollable
           className="h-full"
           emptyMessage={

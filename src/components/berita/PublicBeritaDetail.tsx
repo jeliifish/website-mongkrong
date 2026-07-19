@@ -83,8 +83,7 @@ export default function PublicBeritaDetail({
           Artikel yang kamu cari belum tersedia
         </h1>
         <p className="mt-4 max-w-2xl text-base leading-8 text-zinc-600">
-          Bisa jadi artikel sudah dihapus, ID tidak cocok, atau Firestore belum
-          berhasil mengirim data ke halaman publik.
+          Bisa jadi artikel sudah dihapus, ID tidak cocok, atau koneksi database sedang bermasalah.
         </p>
         <Link
           href="/berita"
@@ -128,6 +127,15 @@ export default function PublicBeritaDetail({
           {item.description}
         </p>
       </section>
+
+      {item.imageUrl && (
+        <section className="mt-8 overflow-hidden rounded-[2rem] border border-zinc-200 bg-white shadow-sm">
+          <div
+            className="min-h-[18rem] bg-cover bg-center sm:min-h-[28rem] w-full"
+            style={{ backgroundImage: `url(${item.imageUrl})` }}
+          />
+        </section>
+      )}
 
       {syncError ? (
         <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">

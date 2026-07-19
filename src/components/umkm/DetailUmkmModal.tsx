@@ -67,9 +67,12 @@ export default function DetailUmkmModal({
             style={umkm.imageUrl ? { backgroundImage: `url(${umkm.imageUrl})` } : undefined}
           />
 
-          <div className="space-y-6">
+          <div className="space-y-6 max-h-[50vh] overflow-y-auto pr-2">
             <InfoBlock label="Nama Usaha" value={umkm.name} />
             <InfoBlock label="Pemilik" value={umkm.owner} />
+            <InfoBlock label="Deskripsi Usaha" value={umkm.description || "-"} />
+            <InfoBlock label="Alamat Usaha" value={umkm.address || "-"} />
+            <InfoBlock label="No. WhatsApp" value={umkm.phone || "-"} />
           </div>
         </div>
       </div>

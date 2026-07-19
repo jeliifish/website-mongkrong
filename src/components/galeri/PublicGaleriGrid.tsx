@@ -103,7 +103,7 @@ export default function PublicGaleriGrid({ fallbackItems }: PublicGaleriGridProp
 
       {!isLoading && items.length === 0 ? (
         <div className="mt-10 rounded-2xl border border-dashed border-zinc-300 bg-white px-5 py-10 text-center text-sm text-zinc-500 sm:px-6 sm:py-12">
-          Belum ada foto galeri di Firestore.
+          Belum ada foto galeri yang tersedia saat ini.
         </div>
       ) : null}
     </>

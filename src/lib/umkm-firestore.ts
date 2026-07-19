@@ -18,9 +18,13 @@ const UMKM_COLLECTION = "umkm";
 type UmkmDocument = {
   name?: string;
   owner?: string;
+  description?: string;
+  address?: string;
+  phone?: string;
   imageUrl?: string;
   imagePublicId?: string;
   fileName?: string;
+  mapUrl?: string;
   createdAt?: number;
   updatedAt?: number;
 };
@@ -38,9 +42,13 @@ function toUmkmItem(id: string, data: UmkmDocument): UmkmItem {
     id,
     name: data.name?.trim() ?? "",
     owner: data.owner?.trim() ?? "",
+    description: data.description?.trim() || undefined,
+    address: data.address?.trim() || undefined,
+    phone: data.phone?.trim() || undefined,
     imageUrl: data.imageUrl?.trim() || undefined,
     imagePublicId: data.imagePublicId?.trim() || undefined,
     fileName: data.fileName?.trim() || undefined,
+    mapUrl: data.mapUrl?.trim() || undefined,
   };
 }
 
@@ -48,9 +56,13 @@ function toUmkmPayload(input: NewUmkmInput | UmkmItem) {
   return {
     name: input.name.trim(),
     owner: input.owner.trim(),
+    description: input.description?.trim() || "",
+    address: input.address?.trim() || "",
+    phone: input.phone?.trim() || "",
     imageUrl: input.imageUrl?.trim() || "",
     imagePublicId: input.imagePublicId?.trim() || "",
     fileName: input.fileName?.trim() || "",
+    mapUrl: input.mapUrl?.trim() || "",
     updatedAt: Date.now(),
   };
 }

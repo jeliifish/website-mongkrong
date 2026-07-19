@@ -1,21 +1,34 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import HomeBeritaPreview from "@/components/home/HomeBeritaPreview";
 import HomeGaleriPreview from "@/components/home/HomeGaleriPreview";
-import HomeHighlights from "@/components/home/HomeHighlights";
 import HomeUmkmPreview from "@/components/home/HomeUmkmPreview";
+import HomeStatistik from "@/components/home/HomeStatistik";
 import { getFallbackBeritaItems } from "@/lib/berita-public";
 import { getFallbackGaleriItems } from "@/lib/galeri-public";
 import { getFallbackUmkmItems } from "@/lib/umkm-public";
-import {
-  profileCards,
-} from "@/data/site-content";
+import { fetchProfilItems, type ProfilItem, fallbackProfilItems } from "@/lib/profil-firestore";
 
 export default function Home() {
   const fallbackBeritaItems = getFallbackBeritaItems();
   const fallbackGaleriItems = getFallbackGaleriItems();
   const fallbackUmkmItems = getFallbackUmkmItems();
+  
+  const [profileItems, setProfileItems] = useState<ProfilItem[]>(fallbackProfilItems);
+
+  useEffect(() => {
+    const loadProfil = async () => {
+      const data = await fetchProfilItems();
+      setProfileItems(data);
+    };
+    void loadProfil();
+  }, []);
+
+  const sekilas = profileItems.find((x) => x.id === "sekilas") || fallbackProfilItems[0];
 
   return (
     <div className="min-h-screen bg-[#f6f7f4] text-zinc-900">
@@ -60,12 +73,6 @@ export default function Home() {
           <div className="absolute inset-x-0 bottom-0 h-4 bg-emerald-700" />
         </section>
 
-        <HomeHighlights
-          fallbackBeritaCount={fallbackBeritaItems.length}
-          fallbackGaleriCount={fallbackGaleriItems.length}
-          fallbackUmkmCount={fallbackUmkmItems.length}
-        />
-
         <section id="profil" className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">
@@ -74,10 +81,8 @@ export default function Home() {
             <h2 className="mt-3 text-4xl font-semibold tracking-tight text-emerald-700 sm:text-5xl">
               Profil singkat dan informasi utama.
             </h2>
-            <p className="mt-5 text-base leading-8 text-zinc-600">
-              Melalui website ini warga dan pengunjung dapat melihat gambaran
-              desa, kegiatan terbaru, galeri dokumentasi, serta potensi UMKM
-              lokal dalam tampilan yang sederhana dan mudah diakses.
+            <p className="mt-5 text-base leading-8 text-zinc-600 max-w-2xl mx-auto whitespace-pre-wrap">
+              {sekilas.description}
             </p>
             <Link
               href="/profil"
@@ -86,18 +91,9 @@ export default function Home() {
               Lihat selengkapnya
             </Link>
           </div>
-
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {profileCards.map((item) => (
-              <article key={item.title} className="rounded-xl border border-zinc-200 bg-white p-6">
-                <p className="text-sm font-semibold text-emerald-700">{item.title}</p>
-                <p className="mt-3 text-sm leading-7 text-zinc-600">
-                  {item.description}
-                </p>
-              </article>
-            ))}
-          </div>
         </section>
+
+        <HomeStatistik />
 
         <section id="berita" className="border-y border-zinc-200 bg-[#f8faf8]">
           <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
@@ -169,6 +165,32 @@ export default function Home() {
                 </Link>
               </div>
               <HomeUmkmPreview fallbackItems={fallbackUmkmItems} />
+            </div>
+          </div>
+        </section>
+
+        {/* Peta Lokasi Section */}
+        <section id="peta" className="border-t border-zinc-200 bg-[#f8faf8] py-16">
+          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-10 text-center md:text-left">
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">
+                Peta Wilayah
+              </p>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
+                Lokasi Padukuhan Mongkrong
+              </h2>
+              <p className="mt-3 text-sm text-zinc-500">
+                Kunjungi Padukuhan Mongkrong, Kalurahan Sampang, Kapanewon Gedangsari, Kabupaten Gunungkidul.
+              </p>
+            </div>
+            <div className="w-full h-96 overflow-hidden rounded-[2rem] border border-zinc-200 shadow-sm bg-white p-2">
+              <iframe
+                src="https://maps.google.com/maps?q=-7.8156379,110.5647486&t=&z=16&ie=UTF8&iwloc=&output=embed"
+                className="w-full h-full rounded-[1.75rem]"
+                style={{ border: 0 }}
+                allowFullScreen={true}
+                loading="lazy"
+              />
             </div>
           </div>
         </section>

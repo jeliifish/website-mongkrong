@@ -65,24 +65,32 @@ export default function HomeUmkmPreview({ fallbackItems }: HomeUmkmPreviewProps)
             <Link
               key={item.id}
               href={`/umkm/${item.id}`}
-              className="rounded-xl border border-zinc-200 bg-[#f8faf8] p-4 transition hover:border-emerald-200 hover:bg-white sm:p-5"
+              className="group flex flex-col overflow-hidden rounded-xl border border-zinc-200 bg-[#f8faf8] transition hover:border-emerald-200 hover:bg-white"
             >
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
-                Produk Lokal
-              </p>
-              <h3 className="mt-3 text-base font-semibold text-zinc-900 sm:text-lg">
-                {item.name}
-              </h3>
-              <p className="mt-2 text-sm leading-7 text-zinc-600">
-                Pemilik: {item.owner}
-              </p>
-              <p className="mt-4 text-sm font-semibold text-emerald-700">Lihat detail</p>
+              <div
+                className="h-40 w-full bg-[linear-gradient(180deg,#d7e5d8_0%,#96c498_100%)] bg-cover bg-center shrink-0"
+                style={item.imageUrl ? { backgroundImage: `url(${item.imageUrl})` } : undefined}
+              />
+              <div className="flex flex-1 flex-col justify-between p-4 sm:p-5">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">
+                    Produk Lokal
+                  </p>
+                  <h3 className="mt-2 text-base font-semibold text-zinc-900 group-hover:text-emerald-700 transition sm:text-lg">
+                    {item.name}
+                  </h3>
+                  <p className="mt-1 text-sm text-zinc-600">
+                    Pemilik: {item.owner}
+                  </p>
+                </div>
+                <p className="mt-4 text-sm font-semibold text-emerald-700">Lihat detail</p>
+              </div>
             </Link>
           ))}
         </div>
       ) : (
         <div className="rounded-2xl border border-dashed border-zinc-300 bg-[#f8faf8] px-5 py-8 text-sm text-zinc-500 sm:px-6 sm:py-10">
-          Belum ada data UMKM di Firestore untuk ditampilkan di beranda.
+          Belum ada data UMKM yang tersedia untuk ditampilkan di beranda.
         </div>
       )}
     </>

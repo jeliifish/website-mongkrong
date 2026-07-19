@@ -1,26 +1,22 @@
 "use client";
 
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
-
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import Button from "@/components/Button";
-import DatePicker from "@/components/DatePicker";
 
 type NewBerita = {
   title: string;
   description: string;
   date: string;
+  author: string;
+  category: string;
+  content: string[];
+  file: File | null;
 };
 
 type AddBeritaModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onSave: (berita: NewBerita) => void;
-};
-
-type FormState = {
-  title: string;
-  description: string;
-  date: string;
 };
 
 const todayFormatter = new Intl.DateTimeFormat("id-ID", {
@@ -76,23 +72,61 @@ function AddBeritaForm({
   onClose,
   onSave,
 }: Omit<AddBeritaModalProps, "isOpen">) {
-  const [form, setForm] = useState<FormState>({
-    title: "",
-    description: "",
-    date: todayFormatter.format(new Date()),
-  });
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [title, setTitle] = useState("");
+  const [slug, setSlug] = useState("");
+  const [contentHtml, setContentHtml] = useState("<p><br></p>");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isPublished, setIsPublished] = useState(true);
 
-  const handleChange = (field: keyof FormState, value: string) => {
-    setForm((current) => ({ ...current, [field]: value }));
+  // Auto-generate slug when title changes
+  useEffect(() => {
+    const generatedSlug = title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .trim();
+    setSlug(generatedSlug);
+  }, [title]);
+
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSelectedFile(event.target.files?.[0] ?? null);
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    if (!title.trim() || !contentHtml.trim() || contentHtml === "<p><br></p>") {
+      return;
+    }
+
+    // Extract text description from HTML for summary representation
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = contentHtml;
+    const plainText = tempDiv.textContent || tempDiv.innerText || "";
+    const description = plainText.slice(0, 160).trim();
+
+    // Map HTML elements to string[] paragraphs
+    const paragraphs = Array.from(tempDiv.childNodes)
+      .map((node) => {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          return (node as HTMLElement).outerHTML;
+        } else {
+          return node.textContent || "";
+        }
+      })
+      .map((p) => p.trim())
+      .filter(Boolean);
+
     onSave({
-      title: form.title.trim(),
-      description: form.description.trim(),
-      date: form.date.trim(),
+      title: title.trim(),
+      description,
+      date: todayFormatter.format(new Date()),
+      author: "Admin Desa",
+      category: "Informasi Desa",
+      content: paragraphs.length > 0 ? paragraphs : [contentHtml],
+      file: selectedFile,
     });
     onClose();
   };
@@ -102,84 +136,209 @@ function AddBeritaForm({
       onSubmit={handleSubmit}
       className="relative z-10 flex max-h-[calc(100vh-3rem)] w-full max-w-4xl flex-col overflow-hidden border border-zinc-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)]"
     >
-      <div className="flex items-start justify-between gap-6 border-b border-zinc-200 px-8 py-6">
-        <div className="space-y-2">
-          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-emerald-700">
-            Tulis Berita
-          </p>
-          <h2 className="text-3xl font-semibold tracking-tight text-zinc-950">
-            Tambah berita baru
-          </h2>
-          <p className="text-sm leading-7 text-zinc-600">
-            Isi judul, deskripsi, dan tanggal berita sebelum dipublikasikan.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={onClose}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-zinc-200 text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-900"
-        >
-          <span className="sr-only">Tutup</span>
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 24 24"
-            className="h-5 w-5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-          >
-            <path d="M6 6 18 18" />
-            <path d="M18 6 6 18" />
-          </svg>
-        </button>
+      <div className="flex items-center justify-between border-b border-zinc-200 px-8 py-5">
+        <h2 className="text-xl font-bold text-zinc-950">
+          Tulis Artikel Berita Baru
+        </h2>
+        <CloseButton onClick={onClose} />
       </div>
 
-      <div className="flex-1 overflow-y-auto px-8 py-7">
-        <div className="mx-auto max-w-3xl space-y-6">
-          <Field label="Judul Berita">
+      <div className="flex-1 overflow-y-auto px-8 py-6 space-y-5">
+        {/* Row 1: Judul Berita & Slug */}
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field label="JUDUL BERITA">
             <input
               type="text"
-              value={form.title}
-              onChange={(event) => handleChange("title", event.target.value)}
-              placeholder="Masukkan judul berita"
-              className="h-12 w-full border border-zinc-200 px-4 text-sm text-zinc-800 outline-none transition focus:border-emerald-500"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Contoh: Kerja Bakti Massal Mongkrong..."
+              required
+              className="h-12 w-full rounded-xl border border-zinc-200 px-4 text-sm text-zinc-800 outline-none transition focus:border-emerald-500"
             />
           </Field>
 
-          <Field label="Deskripsi Berita">
-            <textarea
-              value={form.description}
-              onChange={(event) => handleChange("description", event.target.value)}
-              placeholder="Tulis deskripsi singkat berita"
-              rows={6}
-              className="w-full resize-none border border-zinc-200 px-4 py-3 text-sm leading-7 text-zinc-800 outline-none transition focus:border-emerald-500"
-            />
-          </Field>
-
-          <Field label="Tanggal Berita">
-            <DatePicker
-              value={form.date}
-              onChange={(value) => handleChange("date", value)}
+          <Field label="SLUG URL (OTOMATIS)">
+            <input
+              type="text"
+              value={slug}
+              readOnly
+              placeholder="kerja-bakti-massal-mongkrong"
+              className="h-12 w-full rounded-xl border border-zinc-100 bg-zinc-50 px-4 text-sm text-zinc-400 outline-none"
             />
           </Field>
         </div>
+
+        {/* Row 2: Unggah Foto */}
+        <div className="space-y-2">
+          <span className="block text-[0.72rem] font-bold uppercase tracking-[0.2em] text-zinc-400">
+            UNGGAH FOTO BERITA
+          </span>
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+          <div className="flex items-center gap-3 mt-2">
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              className="h-10 rounded-xl border border-zinc-200 bg-zinc-50 px-4 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-100 cursor-pointer"
+            >
+              Choose File
+            </button>
+            <span className="text-xs text-zinc-500 truncate max-w-[300px]">
+              {selectedFile ? selectedFile.name : "No file chosen"}
+            </span>
+          </div>
+        </div>
+
+        {/* Row 3: Isi Konten Berita (Rich Text Editor) */}
+        <Field label="ISI KONTEN BERITA">
+          <RichTextEditor value={contentHtml} onChange={setContentHtml} placeholder="Ketik konten artikel secara lengkap di sini..." />
+        </Field>
+
+        {/* Checkbox Terbitkan sekarang */}
+        <label className="flex items-center gap-3 select-none cursor-pointer">
+          <input
+            type="checkbox"
+            checked={isPublished}
+            onChange={(e) => setIsPublished(e.target.checked)}
+            className="h-4.5 w-4.5 accent-emerald-700 cursor-pointer"
+          />
+          <span className="text-sm font-semibold text-zinc-700">
+            Terbitkan sekarang (Dapat dibaca oleh publik)
+          </span>
+        </label>
       </div>
 
       <div className="flex flex-col-reverse gap-3 border-t border-zinc-200 px-8 py-5 sm:flex-row sm:justify-end">
-        <button
-          type="button"
-          onClick={onClose}
-          className="inline-flex h-12 items-center justify-center border border-zinc-200 px-6 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
-        >
-          Batal
-        </button>
-        <Button type="submit" className="h-12 px-8 shadow-none hover:translate-y-0">
-          Simpan Berita
+        <CancelButton onClick={onClose} />
+        <Button type="submit" className="h-12 px-8 shadow-none hover:translate-y-0 cursor-pointer">
+          Simpan & Terbitkan
         </Button>
       </div>
     </form>
+  );
+}
+
+type RichTextEditorProps = {
+  value: string;
+  onChange: (html: string) => void;
+  placeholder?: string;
+};
+
+function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
+  const editorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (editorRef.current && editorRef.current.innerHTML !== value) {
+      editorRef.current.innerHTML = value || "<p><br></p>";
+    }
+  }, []);
+
+  const handleInput = () => {
+    if (editorRef.current) {
+      onChange(editorRef.current.innerHTML);
+    }
+  };
+
+  const executeCommand = (command: string, value = "") => {
+    document.execCommand(command, false, value);
+    handleInput();
+  };
+
+  return (
+    <div className="w-full rounded-xl border border-zinc-200 bg-white focus-within:border-emerald-500 overflow-hidden transition">
+      <style dangerouslySetInnerHTML={{__html: `
+        .rich-text-editor-body ul { list-style-type: disc !important; padding-left: 1.5rem !important; margin: 0.5rem 0 !important; }
+        .rich-text-editor-body ol { list-style-type: decimal !important; padding-left: 1.5rem !important; margin: 0.5rem 0 !important; }
+        .rich-text-editor-body p { margin-bottom: 0.5rem !important; }
+        .rich-text-editor-body:empty::before { content: attr(data-placeholder); color: #a1a1aa; }
+      `}} />
+
+      {/* Toolbar */}
+      <div className="flex flex-wrap items-center gap-1 border-b border-zinc-200 bg-zinc-50/50 px-3 py-2 text-zinc-500">
+        <button
+          type="button"
+          onClick={() => executeCommand("bold")}
+          className="h-8 w-8 rounded font-bold hover:bg-zinc-200 hover:text-zinc-900 transition flex items-center justify-center text-sm cursor-pointer"
+          title="Tebal"
+        >
+          B
+        </button>
+        <button
+          type="button"
+          onClick={() => executeCommand("italic")}
+          className="h-8 w-8 rounded italic hover:bg-zinc-200 hover:text-zinc-900 transition flex items-center justify-center text-sm cursor-pointer"
+          title="Miring"
+        >
+          I
+        </button>
+        <button
+          type="button"
+          onClick={() => executeCommand("underline")}
+          className="h-8 w-8 rounded underline hover:bg-zinc-200 hover:text-zinc-900 transition flex items-center justify-center text-sm cursor-pointer"
+          title="Garis Bawah"
+        >
+          U
+        </button>
+        <button
+          type="button"
+          onClick={() => executeCommand("strikeThrough")}
+          className="h-8 w-8 rounded line-through hover:bg-zinc-200 hover:text-zinc-900 transition flex items-center justify-center text-sm cursor-pointer"
+          title="Coret"
+        >
+          S
+        </button>
+        <div className="h-4 w-[1px] bg-zinc-200 mx-1" />
+        <button
+          type="button"
+          onClick={() => executeCommand("insertUnorderedList")}
+          className="h-8 w-8 rounded hover:bg-zinc-200 hover:text-zinc-900 transition flex items-center justify-center cursor-pointer"
+          title="Daftar Bullet"
+        >
+          <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <line x1="9" y1="6" x2="20" y2="6" />
+            <line x1="9" y1="12" x2="20" y2="12" />
+            <line x1="9" y1="18" x2="20" y2="18" />
+            <circle cx="4.5" cy="6" r="1" fill="currentColor" />
+            <circle cx="4.5" cy="12" r="1" fill="currentColor" />
+            <circle cx="4.5" cy="18" r="1" fill="currentColor" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          onClick={() => executeCommand("insertOrderedList")}
+          className="h-8 w-8 rounded hover:bg-zinc-200 hover:text-zinc-900 transition flex items-center justify-center cursor-pointer"
+          title="Daftar Angka"
+        >
+          <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <line x1="10" y1="6" x2="21" y2="6" />
+            <line x1="10" y1="12" x2="21" y2="12" />
+            <line x1="10" y1="18" x2="21" y2="18" />
+            <path d="M4 4h1.5v4h-1.5M4 8h3" strokeWidth="2.2" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          onClick={() => executeCommand("removeFormat")}
+          className="h-8 w-8 rounded hover:bg-zinc-200 hover:text-zinc-900 transition flex items-center justify-center cursor-pointer text-xs font-bold"
+          title="Hapus Format"
+        >
+          Tₓ
+        </button>
+      </div>
+
+      <div
+        ref={editorRef}
+        contentEditable
+        onInput={handleInput}
+        data-placeholder={placeholder}
+        className="w-full min-h-[200px] max-h-[300px] overflow-y-auto p-4 text-sm leading-relaxed text-zinc-800 outline-none rich-text-editor-body"
+      />
+    </div>
   );
 }
 
@@ -190,11 +349,47 @@ type FieldProps = {
 
 function Field({ label, children }: FieldProps) {
   return (
-    <label className="block space-y-2">
-      <span className="text-[0.72rem] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+    <div className="block space-y-2">
+      <span className="block text-[0.72rem] font-bold uppercase tracking-[0.2em] text-zinc-400">
         {label}
       </span>
       {children}
-    </label>
+    </div>
+  );
+}
+
+function CloseButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-zinc-200 text-zinc-400 transition hover:border-zinc-300 hover:text-zinc-600 cursor-pointer"
+    >
+      <span className="sr-only">Tutup</span>
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+        className="h-4 w-4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      >
+        <path d="M6 6 18 18" />
+        <path d="M18 6 6 18" />
+      </svg>
+    </button>
+  );
+}
+
+function CancelButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex h-12 items-center justify-center rounded-xl border border-zinc-200 px-6 text-sm font-semibold text-zinc-500 transition hover:bg-zinc-50 cursor-pointer"
+    >
+      Batal
+    </button>
   );
 }

@@ -22,7 +22,22 @@ export default function AdminPemetaanPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState<string | null>(null);
   const [syncError, setSyncError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Custom Toast State
+  interface ToastItem {
+    id: string;
+    message: string;
+    type: "success" | "error" | "warning";
+  }
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+
+  const showToast = (message: string, type: "success" | "error" | "warning" = "success") => {
+    const id = Math.random().toString(36).substring(2, 9);
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 4000);
+  };
 
   // Form states
   const [lahanForm, setLahanForm] = useState<{ [key: string]: string }>({});
@@ -101,7 +116,7 @@ export default function AdminPemetaanPage() {
 
     const valueNum = parseFloat(valueStr);
     if (isNaN(valueNum) || valueNum < 0) {
-      alert("Luas lahan harus berupa angka positif.");
+      showToast("Luas lahan harus berupa angka positif.", "warning");
       return;
     }
 
@@ -110,8 +125,7 @@ export default function AdminPemetaanPage() {
         prev.map((item) => (item.id === id ? { ...item, area: valueNum } : item))
       );
       setEditingLahan((prev) => ({ ...prev, [id]: false }));
-      setSuccessMessage(`Berhasil memperbarui luas ${id} (lokal).`);
-      setTimeout(() => setSuccessMessage(null), 3000);
+      showToast(`Berhasil memperbarui luas ${id} (lokal).`, "success");
       return;
     }
 
@@ -122,10 +136,9 @@ export default function AdminPemetaanPage() {
         prev.map((item) => (item.id === id ? { ...item, area: valueNum } : item))
       );
       setEditingLahan((prev) => ({ ...prev, [id]: false }));
-      setSuccessMessage(`Berhasil menyimpan luas lahan ${id} ke database.`);
-      setTimeout(() => setSuccessMessage(null), 3000);
+      showToast(`Berhasil menyimpan luas lahan ${id} ke database.`, "success");
     } catch {
-      alert("Gagal menyimpan ke database.");
+      showToast("Gagal menyimpan ke database.", "error");
     } finally {
       setIsSubmitting(null);
     }
@@ -165,17 +178,17 @@ export default function AdminPemetaanPage() {
   const handleSaveModal = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!modalForm.name.trim()) {
-      alert("Nama komoditas harus diisi.");
+      showToast("Nama komoditas harus diisi.", "warning");
       return;
     }
     const prodVal = parseFloat(modalForm.productivityPerHa);
     if (isNaN(prodVal) || prodVal < 0) {
-      alert("Produktivitas harus berupa angka positif.");
+      showToast("Produktivitas harus berupa angka positif.", "warning");
       return;
     }
     const pctVal = parseFloat(modalForm.landUsePct);
     if (isNaN(pctVal) || pctVal < 0 || pctVal > 100) {
-      alert("Porsi tanam harus berupa angka antara 0% dan 100%.");
+      showToast("Porsi tanam harus berupa angka antara 0% dan 100%.", "warning");
       return;
     }
 
@@ -199,7 +212,7 @@ export default function AdminPemetaanPage() {
           prev.map((item) => (item.id === editingCrop.id ? { ...item, ...cropData } : item))
         );
         setTanamanForm((prev) => ({ ...prev, [editingCrop.id]: prodVal.toString() }));
-        setSuccessMessage(`Berhasil memperbarui komoditas ${cropData.name}.`);
+        showToast(`Berhasil memperbarui komoditas ${cropData.name}.`, "success");
       } else {
         let generatedId = "";
         if (isFirebaseConfigured) {
@@ -213,12 +226,11 @@ export default function AdminPemetaanPage() {
         };
         setTanamanItems((prev) => [...prev, newCrop]);
         setTanamanForm((prev) => ({ ...prev, [generatedId]: prodVal.toString() }));
-        setSuccessMessage(`Berhasil menambahkan komoditas ${cropData.name}.`);
+        showToast(`Berhasil menambahkan komoditas ${cropData.name}.`, "success");
       }
       setIsModalOpen(false);
-      setTimeout(() => setSuccessMessage(null), 3000);
     } catch {
-      alert("Gagal menyimpan komoditas ke database.");
+      showToast("Gagal menyimpan komoditas ke database.", "error");
     } finally {
       setIsSubmitting(null);
     }
@@ -239,11 +251,10 @@ export default function AdminPemetaanPage() {
         delete next[id];
         return next;
       });
-      setSuccessMessage(`Berhasil menghapus komoditas ${name}.`);
+      showToast(`Berhasil menghapus komoditas ${name}.`, "success");
       setDeleteTarget(null);
-      setTimeout(() => setSuccessMessage(null), 3000);
     } catch {
-      alert("Gagal menghapus komoditas dari database.");
+      showToast("Gagal menghapus komoditas dari database.", "error");
     } finally {
       setIsSubmitting(null);
     }
@@ -285,11 +296,7 @@ export default function AdminPemetaanPage() {
           </div>
         ) : null}
 
-        {successMessage ? (
-          <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs leading-5 text-emerald-800">
-            ✅ {successMessage}
-          </div>
-        ) : null}
+        {/* Success message rendered via toast notifications */}
       </div>
 
       <div className="grid gap-8 lg:grid-cols-[1.6fr_1fr]">
@@ -694,6 +701,68 @@ export default function AdminPemetaanPage() {
           </div>
         </div>
       )}
+
+      {/* Toast Notifications */}
+      <div className="fixed top-6 right-6 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none animate-toast-slide-in">
+        {toasts.map((toast) => {
+          let bgClass = "bg-emerald-50 border-emerald-200 text-emerald-800 shadow-[0_10px_30px_rgba(16,185,129,0.12)]";
+          let icon = (
+            <svg className="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          );
+
+          if (toast.type === "error") {
+            bgClass = "bg-rose-50 border-rose-200 text-rose-800 shadow-[0_10px_30px_rgba(244,63,94,0.12)]";
+            icon = (
+              <svg className="h-5 w-5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            );
+          } else if (toast.type === "warning") {
+            bgClass = "bg-amber-50 border-amber-200 text-amber-800 shadow-[0_10px_30px_rgba(245,158,11,0.12)]";
+            icon = (
+              <svg className="h-5 w-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            );
+          }
+
+          return (
+            <div
+              key={toast.id}
+              className={`pointer-events-auto flex items-start gap-3 rounded-2xl border p-4 shadow-lg backdrop-blur-md transition-all duration-300 animate-toast-slide-in ${bgClass}`}
+            >
+              <div className="shrink-0">{icon}</div>
+              <div className="text-xs font-semibold leading-relaxed flex-1">{toast.message}</div>
+              <button
+                onClick={() => setToasts((prev) => prev.filter((t) => t.id !== toast.id))}
+                className="text-zinc-400 hover:text-zinc-655 transition-colors duration-200"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          );
+        })}
+      </div>
+
+      <style>{`
+        @keyframes toastSlideIn {
+          from {
+            transform: translateX(120%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        .animate-toast-slide-in {
+          animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+      `}</style>
     </div>
   );
 }

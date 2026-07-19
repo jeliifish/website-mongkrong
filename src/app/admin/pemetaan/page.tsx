@@ -38,6 +38,7 @@ export default function AdminPemetaanPage() {
     landUsePct: "100",
     factorNotes: ""
   });
+  const [deleteTarget, setDeleteTarget] = useState<TanamanItem | null>(null);
 
   useEffect(() => {
     let isCancelled = false;
@@ -250,10 +251,9 @@ export default function AdminPemetaanPage() {
     }
   };
 
-  const handleDeleteCrop = async (id: string, name: string) => {
-    if (!confirm(`Apakah Anda yakin ingin menghapus komoditas ${name}?`)) {
-      return;
-    }
+  const confirmDeleteCrop = async () => {
+    if (!deleteTarget) return;
+    const { id, name } = deleteTarget;
 
     setIsSubmitting(`delete-${id}`);
     try {
@@ -267,6 +267,7 @@ export default function AdminPemetaanPage() {
         return next;
       });
       setSuccessMessage(`Berhasil menghapus komoditas ${name}.`);
+      setDeleteTarget(null);
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch {
       alert("Gagal menghapus komoditas dari database.");
@@ -436,7 +437,7 @@ export default function AdminPemetaanPage() {
                         <button
                           type="button"
                           disabled={isSubmitting !== null}
-                          onClick={() => handleDeleteCrop(crop.id, crop.name)}
+                          onClick={() => setDeleteTarget(crop)}
                           className="text-[0.7rem] font-semibold text-rose-600 hover:text-rose-700 disabled:opacity-50"
                         >
                           Hapus
@@ -665,6 +666,49 @@ export default function AdminPemetaanPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm transition-opacity duration-300">
+          <div className="w-full max-w-md rounded-3xl bg-white border border-zinc-200/80 shadow-2xl p-6 md:p-8 transform transition-all duration-300 scale-100 animate-scale-up">
+            <div className="flex items-center gap-3 border-b border-zinc-100 pb-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-rose-50 text-rose-600">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-bold text-zinc-900">
+                Hapus Komoditas
+              </h3>
+            </div>
+
+            <div className="mt-4">
+              <p className="text-sm text-zinc-600 font-medium">
+                Apakah Anda yakin ingin menghapus komoditas <span className="font-extrabold text-zinc-950">“{deleteTarget.name}”</span>? Tindakan ini akan menghapus data dari database dan tidak dapat dibatalkan.
+              </p>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                disabled={isSubmitting !== null}
+                onClick={() => setDeleteTarget(null)}
+                className="h-10 px-4 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors duration-200 disabled:opacity-50"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                disabled={isSubmitting !== null}
+                onClick={confirmDeleteCrop}
+                className="h-10 px-5 rounded-xl bg-rose-600 hover:bg-rose-700 text-xs font-semibold text-white shadow-sm transition-colors duration-200 disabled:opacity-50"
+              >
+                {isSubmitting === `delete-${deleteTarget.id}` ? "Menghapus..." : "Ya, Hapus"}
+              </button>
+            </div>
           </div>
         </div>
       )}

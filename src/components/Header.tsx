@@ -10,6 +10,7 @@ const navigation = [
   { label: "Berita", href: "/berita" },
   { label: "Galeri", href: "/galeri" },
   { label: "UMKM", href: "/umkm" },
+  { label: "Pemetaan", href: "/pemetaan" },
 ];
 
 type HeaderProps = {

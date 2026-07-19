@@ -6,6 +6,7 @@ const quickLinks = [
   { label: "Berita Desa", href: "/berita" },
   { label: "Galeri", href: "/galeri" },
   { label: "UMKM", href: "/umkm" },
+  { label: "Pemetaan Desa", href: "/pemetaan" },
 ];
 
 export default function Footer() {

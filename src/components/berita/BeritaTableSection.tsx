@@ -170,6 +170,7 @@ export default function BeritaTableSection({ items }: BeritaTableSectionProps) {
     date,
     author,
     category,
+    content,
     file,
   }: {
     title: string;
@@ -177,6 +178,7 @@ export default function BeritaTableSection({ items }: BeritaTableSectionProps) {
     date: string;
     author: string;
     category: string;
+    content?: string[];
     file: File | null;
   }) => {
     const trimmedTitle = title.trim();
@@ -196,7 +198,7 @@ export default function BeritaTableSection({ items }: BeritaTableSectionProps) {
       date: trimmedDate,
       category: trimmedCategory,
       author: trimmedAuthor,
-      content: [trimmedDescription],
+      content: content && content.length > 0 ? content : [trimmedDescription],
       imageUrl: file ? URL.createObjectURL(file) : undefined,
       fileName: file?.name,
     };

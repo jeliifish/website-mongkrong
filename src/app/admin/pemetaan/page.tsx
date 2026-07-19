@@ -430,14 +430,14 @@ export default function AdminPemetaanPage() {
         <div className="space-y-6 lg:sticky lg:top-24 h-fit">
           <h2 className="text-lg font-semibold text-zinc-800">Preview Hasil Publik</h2>
           
-          <div className="rounded-3xl bg-zinc-900 text-white p-6 shadow-lg border border-zinc-800">
-            <p className="text-[0.68rem] font-bold tracking-widest text-emerald-400 uppercase">Live Preview Panel</p>
-            <h3 className="mt-3 text-lg font-semibold">Simulasi Panen & Lahan</h3>
-            <p className="mt-2 text-xs text-zinc-400">
+          <div className="rounded-3xl bg-white text-zinc-800 p-6 shadow-sm border border-zinc-200/80">
+            <p className="text-[0.68rem] font-bold tracking-widest text-emerald-700 uppercase">Live Preview Panel</p>
+            <h3 className="mt-3 text-lg font-bold text-zinc-950">Simulasi Panen & Lahan</h3>
+            <p className="mt-2 text-xs leading-relaxed text-zinc-500">
               Berikut adalah visualisasi simulasi dari data di sebelah kiri yang dihitung langsung sebelum Anda menekan tombol simpan.
             </p>
 
-            <div className="mt-6 space-y-6 border-t border-zinc-800 pt-6">
+            <div className="mt-6 space-y-6 border-t border-zinc-100 pt-6">
               {/* Crops simulation output */}
               <div className="space-y-3">
                 <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Estimasi Panen Komoditas</p>
@@ -455,12 +455,12 @@ export default function AdminPemetaanPage() {
                     return (
                       <div
                         key={crop.id}
-                        className="flex justify-between items-center text-xs bg-zinc-800/40 p-2.5 rounded-xl border border-zinc-800"
+                        className="flex justify-between items-center text-xs bg-emerald-50/40 p-2.5 rounded-xl border border-emerald-950/5"
                       >
-                        <span className="font-semibold text-zinc-300">
-                          {crop.name} <span className="text-[0.62rem] text-zinc-500">({(landUseFactor * 100).toFixed(0)}% lahan)</span>
+                        <span className="font-semibold text-zinc-700">
+                          {crop.name} <span className="text-[0.62rem] text-zinc-400 font-normal">({(landUseFactor * 100).toFixed(0)}% lahan)</span>
                         </span>
-                        <span className="font-bold text-emerald-400 text-sm">{formattedHarvest} Ton</span>
+                        <span className="font-extrabold text-emerald-700 text-sm">{formattedHarvest} Ton</span>
                       </div>
                     );
                   })}
@@ -480,22 +480,22 @@ export default function AdminPemetaanPage() {
                   return (
                     <div key={item.id} className="space-y-1">
                       <div className="flex justify-between text-xs">
-                        <span className="text-zinc-400">{item.name}</span>
-                        <span className="text-white font-semibold">
+                        <span className="text-zinc-500 font-medium">{item.name}</span>
+                        <span className="text-zinc-800 font-semibold">
                           {formattedArea} Ha ({pct}%)
                         </span>
                       </div>
-                      <div className="h-2 w-full rounded-full bg-zinc-800 overflow-hidden">
-                        <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${pct}%` }} />
+                      <div className="h-2 w-full rounded-full bg-zinc-100 overflow-hidden border border-zinc-200/30">
+                        <div className="h-full bg-emerald-600 rounded-full" style={{ width: `${pct}%` }} />
                       </div>
                     </div>
                   );
                 })}
               </div>
 
-              <div className="flex justify-between text-xs font-bold text-zinc-400 border-t border-zinc-800 pt-3">
+              <div className="flex justify-between text-xs font-bold text-zinc-500 border-t border-zinc-100 pt-3">
                 <span>Total Luas Wilayah:</span>
-                <span className="text-white">
+                <span className="text-zinc-900 font-bold">
                   {new Intl.NumberFormat("id-ID", {
                     minimumFractionDigits: 0,
                     maximumFractionDigits: 4

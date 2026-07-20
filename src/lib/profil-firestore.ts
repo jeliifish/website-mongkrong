@@ -1,10 +1,16 @@
-import { doc, getDocs, collection, setDoc } from "firebase/firestore";
+import { doc, getDoc, getDocs, collection, setDoc } from "firebase/firestore";
 import { db, isFirebaseConfigured } from "@/lib/firebase";
 
 export type ProfilItem = {
   id: string;
   title: string;
   description: string;
+};
+
+export type LogoConfig = {
+  imageUrl: string;
+  imagePublicId?: string;
+  fileName?: string;
 };
 
 export const fallbackProfilItems: ProfilItem[] = [
@@ -84,4 +90,53 @@ export async function updateProfilItem(item: ProfilItem): Promise<ProfilItem> {
     id: item.id,
     ...payload,
   };
+}
+
+export async function fetchLogoConfig(): Promise<LogoConfig | null> {
+  if (!db || !isFirebaseConfigured) {
+    return null;
+  }
+  try {
+    const docSnap = await getDoc(doc(db, "profil", "logo"));
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      if (data.imageUrl) {
+        return {
+          imageUrl: data.imageUrl,
+          imagePublicId: data.imagePublicId,
+          fileName: data.fileName,
+        };
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error("Gagal memuat logo config:", error);
+    return null;
+  }
+}
+
+export async function updateLogoConfig(config: LogoConfig): Promise<void> {
+  if (!db || !isFirebaseConfigured) {
+    throw new Error("Firebase belum dikonfigurasi.");
+  }
+  const docRef = doc(db, "profil", "logo");
+  await setDoc(docRef, {
+    imageUrl: config.imageUrl,
+    imagePublicId: config.imagePublicId || "",
+    fileName: config.fileName || "",
+    updatedAt: Date.now(),
+  });
+}
+
+export async function deleteLogoConfig(): Promise<void> {
+  if (!db || !isFirebaseConfigured) {
+    throw new Error("Firebase belum dikonfigurasi.");
+  }
+  const docRef = doc(db, "profil", "logo");
+  await setDoc(docRef, {
+    imageUrl: "",
+    imagePublicId: "",
+    fileName: "",
+    updatedAt: Date.now(),
+  });
 }

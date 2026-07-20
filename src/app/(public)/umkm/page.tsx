@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import PublicUmkmGrid from "@/components/umkm/PublicUmkmGrid";
 import { getFallbackUmkmItems } from "@/lib/umkm-public";
+
+export const metadata: Metadata = {
+  title: "UMKM Lokal",
+  description: "Daftar usaha mikro, kecil, menengah, potensi produk lokal warga, dan kerajinan kreatif khas Desa Mongkrong.",
+};
 
 export default function UmkmPage() {
   const fallbackItems = getFallbackUmkmItems();

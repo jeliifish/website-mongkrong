@@ -41,4 +41,10 @@ export const adminNavigation = [
     title: "Kelola Pemetaan",
     subtitle: "Atur luas wilayah dan estimasi hasil panen",
   },
+  {
+    label: "Kontak",
+    href: "/admin/kontak",
+    title: "Hubungi Kami & Pesan Masuk",
+    subtitle: "Kelola info kontak dan pesan dari warga",
+  },
 ] as const;

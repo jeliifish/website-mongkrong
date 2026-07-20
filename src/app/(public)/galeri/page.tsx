@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import PublicGaleriGrid from "@/components/galeri/PublicGaleriGrid";
 import { getFallbackGaleriItems } from "@/lib/galeri-public";
+
+export const metadata: Metadata = {
+  title: "Galeri Kegiatan",
+  description: "Dokumentasi foto dan dokumentasi kegiatan sosial, budaya, keagamaan, serta pembangunan fisik di Desa Mongkrong.",
+};
 
 export default function GaleriPage() {
   const fallbackItems = getFallbackGaleriItems();

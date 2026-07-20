@@ -35,41 +35,40 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#f6f7f4] text-zinc-900">
       <main>
-        <section className="relative min-h-[88vh] overflow-hidden bg-[#223127] text-white">
+        <section className="relative min-h-screen overflow-hidden bg-[#223127] text-white">
           <HeroCarousel />
           <Header />
 
-          <div className="relative z-[3] mx-auto flex min-h-[88vh] max-w-7xl items-center justify-center px-4 pb-20 pt-32 text-center sm:px-6 lg:px-8">
+          <div className="relative z-[3] mx-auto flex min-h-screen max-w-7xl items-center justify-center px-4 pb-24 pt-36 text-center sm:px-6 lg:px-8">
             <div className="max-w-4xl">
               <ScrollReveal animation="fade-down" duration={900} distance={30}>
-                <h1 className="text-5xl font-semibold tracking-tight sm:text-6xl">
-                  Selamat Datang
+                <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-6xl md:text-7xl">
+                  Selamat Datang di <span className="text-emerald-400">Dusun Mongkrong</span>
                 </h1>
               </ScrollReveal>
-              <ScrollReveal animation="fade-up" delay={200} duration={800}>
-                <p className="mt-4 text-2xl font-medium text-white/95 sm:text-3xl">
-                  Website Informasi Desa Mongkrong
+              <ScrollReveal animation="fade-up" delay={300} duration={800}>
+                <p className="mx-auto mt-6 max-w-3xl text-base leading-8 text-white/90 sm:text-lg">
+                  Pusat informasi resmi Dusun Mongkrong, Kalurahan Sampang, Gedangsari,
+                  Gunungkidul. Wadah keterbukaan informasi dan pemberdayaan potensi
+                  lokal padukuhan.
                 </p>
               </ScrollReveal>
-              <ScrollReveal animation="fade-up" delay={400} duration={800}>
-                <p className="mx-auto mt-5 max-w-3xl text-base leading-8 text-white/85 sm:text-lg">
-                  Sumber informasi terbaru tentang profil desa, berita kegiatan,
-                  galeri, dan potensi UMKM warga.
-                </p>
-              </ScrollReveal>
-              <ScrollReveal animation="fade-up" delay={600} duration={800}>
-                <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <ScrollReveal animation="fade-up" delay={500} duration={800}>
+                <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
                   <Link
                     href="/profil"
-                    className="rounded-full bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                    className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-8 py-3.5 text-sm font-semibold text-white transition hover:bg-emerald-700 shadow-md"
                   >
-                    Lihat Profil
+                    <span>Jelajahi Profil</span>
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
                   </Link>
                   <Link
-                    href="/berita"
-                    className="rounded-full border border-white/50 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+                    href="/umkm"
+                    className="rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-zinc-950 transition hover:bg-zinc-50 shadow-md"
                   >
-                    Baca Berita
+                    Lihat Produk UMKM
                   </Link>
                 </div>
               </ScrollReveal>

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import PublicPemetaanDetail from "@/components/pemetaan/PublicPemetaanDetail";
@@ -9,6 +10,18 @@ type PemetaanDetailPageProps = {
     id: string;
   }>;
 };
+
+export async function generateMetadata({
+  params,
+}: PemetaanDetailPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const item = getPemetaanItem(id);
+
+  return {
+    title: item?.title || "Detail Pemetaan",
+    description: item?.summary || "Detail informasi peta wilayah administrasi dan tutupan lahan Desa Mongkrong.",
+  };
+}
 
 export default async function PemetaanDetailPage({
   params,

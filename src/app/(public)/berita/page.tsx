@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import PublicBeritaGrid from "@/components/berita/PublicBeritaGrid";
 import { getFallbackBeritaItems } from "@/lib/berita-public";
+
+export const metadata: Metadata = {
+  title: "Berita & Pengumuman",
+  description: "Ikuti terus kabar terbaru, agenda kegiatan, pengumuman publik, dan informasi resmi dari perangkat desa Mongkrong.",
+};
 
 export default function BeritaPage() {
   const fallbackItems = getFallbackBeritaItems();

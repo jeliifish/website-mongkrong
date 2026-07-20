@@ -11,6 +11,7 @@ const navigation = [
   { label: "Galeri", href: "/galeri" },
   { label: "UMKM", href: "/umkm" },
   { label: "Pemetaan", href: "/pemetaan" },
+  { label: "Kontak", href: "/kontak" },
 ];
 
 type HeaderProps = {
@@ -20,6 +21,7 @@ type HeaderProps = {
 export default function Header({ variant = "overlay" }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const pathname = usePathname();
   const isOverlay = variant === "overlay";
 
@@ -34,6 +36,19 @@ export default function Header({ variant = "overlay" }: HeaderProps) {
 
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
+
+    const loadLogo = async () => {
+      try {
+        const { fetchLogoConfig } = await import("@/lib/profil-firestore");
+        const config = await fetchLogoConfig();
+        if (config && config.imageUrl) {
+          setLogoUrl(config.imageUrl);
+        }
+      } catch (err) {
+        console.error("Gagal load logo di Header:", err);
+      }
+    };
+    void loadLogo();
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
@@ -83,12 +98,16 @@ export default function Header({ variant = "overlay" }: HeaderProps) {
     <header className={headerClass}>
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
         <Link href="/" className={`flex items-center gap-3 ${brandTextClass}`}>
-          <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/60 bg-white/90 text-[0.68rem] font-bold tracking-[0.18em] text-emerald-800 shadow-sm">
-            DM
-          </div>
+          {logoUrl ? (
+            <img src={logoUrl} alt="Logo Dusun" className="h-11 w-auto max-w-11 object-contain" />
+          ) : (
+            <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/60 bg-white/90 text-[0.68rem] font-bold tracking-[0.18em] text-emerald-800 shadow-sm">
+              DM
+            </div>
+          )}
           <div>
             <p className="text-xl font-semibold leading-tight tracking-tight">
-              Desa Mongkrong
+              Dusun Mongkrong
             </p>
             <p className={`text-sm ${brandSubtextClass}`}>
               Kalurahan Sampang

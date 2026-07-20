@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const quickLinks = [
   { label: "Beranda", href: "/" },
@@ -11,18 +14,38 @@ const quickLinks = [
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadLogo = async () => {
+      try {
+        const { fetchLogoConfig } = await import("@/lib/profil-firestore");
+        const config = await fetchLogoConfig();
+        if (config && config.imageUrl) {
+          setLogoUrl(config.imageUrl);
+        }
+      } catch (err) {
+        console.error("Gagal load logo di Footer:", err);
+      }
+    };
+    void loadLogo();
+  }, []);
 
   return (
     <footer className="border-t border-emerald-900 bg-[#14261b] text-white">
       <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.1fr_0.8fr_1fr] lg:px-8">
         <div>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500 text-xs font-bold tracking-[0.18em] text-white">
-              DM
-            </div>
+            {logoUrl ? (
+              <img src={logoUrl} alt="Logo Dusun" className="h-10 w-auto max-w-10 object-contain bg-white/10 rounded p-0.5" />
+            ) : (
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500 text-xs font-bold tracking-[0.18em] text-white">
+                DM
+              </div>
+            )}
             <div>
               <p className="text-base font-semibold text-white">
-                Desa Mongkrong
+                Dusun Mongkrong
               </p>
               <p className="text-sm text-emerald-100/75">
                 Kalurahan Sampang
@@ -78,7 +101,7 @@ export default function Footer() {
 
       <div className="border-t border-white/10">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-2 px-4 py-5 text-sm text-emerald-50/60 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-          <p>&copy; {year} Desa Mongkrong. Seluruh hak cipta dilindungi.</p>
+          <p>&copy; {year} Dusun Mongkrong. Seluruh hak cipta dilindungi.</p>
           <p>Dikelola oleh admin desa.</p>
         </div>
       </div>

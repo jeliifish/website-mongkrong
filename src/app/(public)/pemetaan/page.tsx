@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import PublicPemetaanGrid from "@/components/pemetaan/PublicPemetaanGrid";
 import { getPemetaanItems } from "@/lib/pemetaan";
+
+export const metadata: Metadata = {
+  title: "Peta & Pemetaan Lahan",
+  description: "Cakupan wilayah administrasi, batas wilayah RT/RW, dan persebaran peta tata guna lahan serta tutupan lahan Desa Mongkrong.",
+};
 
 export default function PemetaanPage() {
   const items = getPemetaanItems();

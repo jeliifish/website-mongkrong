@@ -4,17 +4,17 @@ import AuthProvider from "@/components/AuthProvider";
 
 export const metadata: Metadata = {
   title: {
-    default: "Desa Mongkrong - Kalurahan Sampang, Gedangsari",
-    template: "%s | Desa Mongkrong"
+    default: "Padukuhan Mongkrong - Kalurahan Sampang, Gedangsari",
+    template: "%s | Padukuhan Mongkrong"
   },
   description: "Website resmi informasi kependudukan, berita, galeri, pemetaan lahan, dan potensi UMKM Padukuhan Mongkrong, Kalurahan Sampang, Gedangsari, Gunungkidul.",
-  keywords: ["Desa Mongkrong", "Padukuhan Mongkrong", "Sampang", "Gedangsari", "Gunungkidul", "UMKM Mongkrong", "Profil Desa"],
-  authors: [{ name: "KKN Desa Mongkrong" }],
+  keywords: ["Padukuhan Mongkrong", "Desa Mongkrong", "Sampang", "Gedangsari", "Gunungkidul", "UMKM Mongkrong", "Profil Padukuhan"],
+  authors: [{ name: "KKN Padukuhan Mongkrong" }],
   openGraph: {
-    title: "Desa Mongkrong - Kalurahan Sampang",
-    description: "Portal informasi resmi kependudukan, profil wilayah, pemetaan lahan, berita kegiatan, dan UMKM Desa Mongkrong.",
+    title: "Padukuhan Mongkrong - Kalurahan Sampang",
+    description: "Portal informasi resmi kependudukan, profil wilayah, pemetaan lahan, berita kegiatan, dan UMKM Padukuhan Mongkrong.",
     url: "https://website-mongkrong.vercel.app",
-    siteName: "Desa Mongkrong",
+    siteName: "Padukuhan Mongkrong",
     locale: "id_ID",
     type: "website",
   },

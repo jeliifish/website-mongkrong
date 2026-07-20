@@ -1,3 +1,9 @@
+export type CustomStatistikItem = {
+  id: string;
+  label: string;
+  value: string;
+};
+
 export type StatistikItem = {
   id: string;
   jumlahPenduduk: string;
@@ -8,4 +14,6 @@ export type StatistikItem = {
   batasSelatan: string;
   batasBarat: string;
   batasTimur: string;
+  customStats?: CustomStatistikItem[];
 };
+

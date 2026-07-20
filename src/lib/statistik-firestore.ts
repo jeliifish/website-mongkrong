@@ -12,6 +12,11 @@ export const fallbackStatistik: StatistikItem = {
   batasSelatan: "Desa Terbah",
   batasBarat: "Desa Serut",
   batasTimur: "Sidomulyo",
+  customStats: [
+    { id: "laki-laki", label: "Penduduk Laki-laki", value: "358 Jiwa" },
+    { id: "perempuan", label: "Penduduk Perempuan", value: "374 Jiwa" },
+    { id: "pekerjaan", label: "Mata Pencaharian Utama", value: "Petani & Buruh Tani" }
+  ]
 };
 
 export async function fetchStatistik(): Promise<StatistikItem> {
@@ -35,6 +40,7 @@ export async function fetchStatistik(): Promise<StatistikItem> {
         batasSelatan: data.batasSelatan || fallbackStatistik.batasSelatan,
         batasBarat: data.batasBarat || fallbackStatistik.batasBarat,
         batasTimur: data.batasTimur || fallbackStatistik.batasTimur,
+        customStats: data.customStats || fallbackStatistik.customStats || [],
       };
     }
     return fallbackStatistik;
@@ -59,6 +65,7 @@ export async function updateStatistik(data: Omit<StatistikItem, "id">): Promise<
     batasSelatan: data.batasSelatan.trim(),
     batasBarat: data.batasBarat.trim(),
     batasTimur: data.batasTimur.trim(),
+    customStats: data.customStats || [],
     updatedAt: Date.now(),
   };
 

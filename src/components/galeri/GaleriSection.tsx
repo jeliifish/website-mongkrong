@@ -335,10 +335,43 @@ export default function GaleriSection({ items }: GaleriSectionProps) {
       </div>
 
       {filteredAlbums.length === 0 ? (
-        <div className="mt-6 border border-dashed border-zinc-300 bg-white px-6 py-10 text-center text-sm text-zinc-500">
-          {isLoading
-            ? "Memuat galeri dari Firestore..."
-            : "Galeri dengan judul tersebut belum ditemukan."}
+        <div className="mt-6 rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-14 text-center">
+          {isLoading ? (
+            <>
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50">
+                <svg className="h-6 w-6 animate-spin text-emerald-600" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+              </div>
+              <p className="text-sm font-medium text-zinc-700">Memuat galeri...</p>
+              <p className="mt-1 text-xs text-zinc-400">Sedang mengambil data dari Firestore</p>
+            </>
+          ) : searchQuery.trim() ? (
+            <>
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100">
+                <svg className="h-6 w-6 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+              </div>
+              <p className="text-sm font-medium text-zinc-700">Galeri tidak ditemukan</p>
+              <p className="mt-1 text-xs text-zinc-400">
+                Tidak ada galeri dengan judul &quot;{searchQuery.trim()}&quot;. Coba kata kunci lain.
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50">
+                <svg className="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+                </svg>
+              </div>
+              <p className="text-sm font-medium text-zinc-700">Belum ada foto di galeri</p>
+              <p className="mt-1 text-xs text-zinc-400">
+                Klik tombol &quot;Tambah Foto&quot; untuk menambahkan foto pertama.
+              </p>
+            </>
+          )}
         </div>
       ) : null}
 

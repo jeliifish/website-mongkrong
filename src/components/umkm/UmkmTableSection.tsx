@@ -29,7 +29,7 @@ type UmkmTableSectionProps = {
 };
 
 export default function UmkmTableSection({ items }: UmkmTableSectionProps) {
-  const pageSize = 5;
+  const [pageSize, setPageSize] = useState(5);
   const [umkmItems, setUmkmItems] = useState<UmkmItem[]>(() =>
     isFirebaseConfigured ? [] : items,
   );
@@ -342,7 +342,13 @@ export default function UmkmTableSection({ items }: UmkmTableSectionProps) {
           totalPages={totalPages}
           totalItems={filteredItems.length}
           pageSize={pageSize}
+          pageSizeOptions={[5, 10, 25, 50]}
+          itemLabel="UMKM"
           onPageChange={(page) => setCurrentPage(Math.min(Math.max(page, 1), totalPages))}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setCurrentPage(1);
+          }}
         />
       </div>
 

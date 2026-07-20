@@ -29,6 +29,15 @@ export default function Footer() {
       }
     };
     void loadLogo();
+
+    const handleLogoUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent<string | null>;
+      setLogoUrl(customEvent.detail || null);
+    };
+    window.addEventListener("logoUpdated", handleLogoUpdate);
+    return () => {
+      window.removeEventListener("logoUpdated", handleLogoUpdate);
+    };
   }, []);
 
   return (
@@ -37,15 +46,15 @@ export default function Footer() {
         <div>
           <div className="flex items-center gap-3">
             {logoUrl ? (
-              <img src={logoUrl} alt="Logo Dusun" className="h-10 w-auto max-w-10 object-contain bg-white/10 rounded p-0.5" />
+              <img src={logoUrl} alt="Logo Padukuhan" className="h-10 w-auto max-w-10 object-contain bg-white/10 rounded p-0.5" />
             ) : (
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500 text-xs font-bold tracking-[0.18em] text-white">
-                DM
+                PM
               </div>
             )}
             <div>
               <p className="text-base font-semibold text-white">
-                Dusun Mongkrong
+                Padukuhan Mongkrong
               </p>
               <p className="text-sm text-emerald-100/75">
                 Kalurahan Sampang

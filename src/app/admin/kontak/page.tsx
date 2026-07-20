@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import AdminShell from "@/components/AdminShell";
 import type { KontakInfo, PesanMasuk } from "@/types/kontak";
 import {
   fetchKontakInfo,
@@ -10,6 +9,8 @@ import {
   deletePesan,
   fallbackKontakInfo,
 } from "@/lib/kontak-firestore";
+import DetailPesanModal from "@/components/kontak/DetailPesanModal";
+import Pagination from "@/components/Pagination";
 
 export default function AdminKontakPage() {
   // ─── Kontak Info ──────────────────────────────────
@@ -21,7 +22,11 @@ export default function AdminKontakPage() {
   const [pesanList, setPesanList] = useState<PesanMasuk[]>([]);
   const [isLoadingPesan, setIsLoadingPesan] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [selectedPesan, setSelectedPesan] = useState<PesanMasuk | null>(null);
+
+  // ─── Pagination ───────────────────────────────────
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
   useEffect(() => {
     const load = async () => {
@@ -60,6 +65,9 @@ export default function AdminKontakPage() {
     try {
       await deletePesan(deletingId);
       setPesanList((prev) => prev.filter((p) => p.id !== deletingId));
+      if (selectedPesan?.id === deletingId) {
+        setSelectedPesan(null);
+      }
     } catch (err) {
       console.error("Gagal menghapus pesan:", err);
     } finally {
@@ -78,20 +86,16 @@ export default function AdminKontakPage() {
     });
   };
 
-  return (
-    <AdminShell>
-      {/* Page Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
-          Hubungi Kami &amp; Pesan Masuk
-        </h1>
-        <p className="mt-1 text-sm text-zinc-500">
-          Kelola informasi alamat/kontak resmi padukuhan dan tinjau pesan masuk
-          dari formulir kontak publik.
-        </p>
-      </div>
+  const totalPages = Math.max(1, Math.ceil(pesanList.length / pageSize));
+  const activePage = Math.min(currentPage, totalPages);
+  const paginatedPesan = pesanList.slice(
+    (activePage - 1) * pageSize,
+    activePage * pageSize
+  );
 
-      <div className="mt-8 grid gap-8 xl:grid-cols-[380px_1fr]">
+  return (
+    <div>
+      <div className="grid gap-8 xl:grid-cols-[380px_1fr]">
         {/* Left Column — Edit Info Kontak */}
         <form
           onSubmit={handleSaveInfo}
@@ -161,7 +165,7 @@ export default function AdminKontakPage() {
           <button
             type="submit"
             disabled={isSavingInfo}
-            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60 shadow-sm"
+            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60 shadow-sm cursor-pointer"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
@@ -177,100 +181,115 @@ export default function AdminKontakPage() {
         </form>
 
         {/* Right Column — Pesan Masuk */}
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
+        <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h2 className="text-base font-semibold text-zinc-900">
+                Kotak Masuk Pesan ({pesanList.length})
+              </h2>
             </div>
-            <h2 className="text-base font-semibold text-zinc-900">
-              Kotak Masuk Pesan ({pesanList.length})
-            </h2>
+
+            {isLoadingPesan ? (
+              <p className="mt-6 text-center text-sm text-zinc-400">
+                Memuat pesan...
+              </p>
+            ) : pesanList.length === 0 ? (
+              <p className="mt-6 text-center text-sm italic text-zinc-400">
+                Kotak masuk kosong. Belum ada pesan dari warga.
+              </p>
+            ) : (
+              <div className="mt-6 overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-zinc-200 text-left">
+                      <th className="pb-3 pr-4 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-zinc-500">
+                        Pengirim
+                      </th>
+                      <th className="pb-3 pr-4 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-zinc-500">
+                        Subjek
+                      </th>
+                      <th className="pb-3 pr-4 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-zinc-500">
+                        Tanggal Masuk
+                      </th>
+                      <th className="pb-3 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-zinc-500 text-right">
+                        Aksi
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-100">
+                    {paginatedPesan.map((p) => (
+                      <tr key={p.id} className="group hover:bg-zinc-50/60 transition">
+                        <td className="py-3 pr-4">
+                          <p className="font-medium text-zinc-900">{p.nama}</p>
+                          {p.email && (
+                            <p className="text-xs text-zinc-400">{p.email}</p>
+                          )}
+                        </td>
+                        <td className="py-3 pr-4 text-zinc-600 truncate max-w-[180px]" title={p.subjek}>
+                          {p.subjek || "—"}
+                        </td>
+                        <td className="py-3 pr-4 text-zinc-500 whitespace-nowrap">
+                          {formatDate(p.createdAt)}
+                        </td>
+                        <td className="py-3 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedPesan(p)}
+                              className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:border-emerald-300 hover:text-emerald-700 hover:bg-emerald-50/50 cursor-pointer"
+                            >
+                              Baca
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeletePesan(p.id)}
+                              className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-rose-500 transition hover:border-rose-300 hover:bg-rose-50 cursor-pointer"
+                            >
+                              Hapus
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
 
-          {isLoadingPesan ? (
-            <p className="mt-6 text-center text-sm text-zinc-400">
-              Memuat pesan...
-            </p>
-          ) : pesanList.length === 0 ? (
-            <p className="mt-6 text-center text-sm italic text-zinc-400">
-              Kotak masuk kosong. Belum ada pesan dari warga.
-            </p>
-          ) : (
-            <div className="mt-6 overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-zinc-200 text-left">
-                    <th className="pb-3 pr-4 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-zinc-500">
-                      Pengirim
-                    </th>
-                    <th className="pb-3 pr-4 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-zinc-500">
-                      Subjek
-                    </th>
-                    <th className="pb-3 pr-4 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-zinc-500">
-                      Tanggal Masuk
-                    </th>
-                    <th className="pb-3 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-zinc-500">
-                      Aksi
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-100">
-                  {pesanList.map((p) => (
-                    <tr key={p.id} className="group">
-                      <td className="py-3 pr-4">
-                        <p className="font-medium text-zinc-900">{p.nama}</p>
-                        {p.email && (
-                          <p className="text-xs text-zinc-400">{p.email}</p>
-                        )}
-                      </td>
-                      <td className="py-3 pr-4 text-zinc-600">
-                        {p.subjek || "—"}
-                      </td>
-                      <td className="py-3 pr-4 text-zinc-500 whitespace-nowrap">
-                        {formatDate(p.createdAt)}
-                      </td>
-                      <td className="py-3">
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setExpandedId(expandedId === p.id ? null : p.id)
-                            }
-                            className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 transition hover:border-emerald-300 hover:text-emerald-700"
-                          >
-                            {expandedId === p.id ? "Tutup" : "Baca"}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeletePesan(p.id)}
-                            className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-rose-500 transition hover:border-rose-300 hover:bg-rose-50"
-                          >
-                            Hapus
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              {/* Expanded message view */}
-              {expandedId && (
-                <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/50 p-5">
-                  <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-emerald-700">
-                    Isi Pesan
-                  </p>
-                  <p className="mt-2 text-sm leading-7 text-zinc-700 whitespace-pre-wrap">
-                    {pesanList.find((p) => p.id === expandedId)?.pesan || ""}
-                  </p>
-                </div>
-              )}
+          {/* Pagination Component */}
+          {pesanList.length > 0 && (
+            <div className="mt-6">
+              <Pagination
+                currentPage={activePage}
+                totalPages={totalPages}
+                totalItems={pesanList.length}
+                pageSize={pageSize}
+                pageSizeOptions={[5, 10, 25, 50]}
+                itemLabel="pesan"
+                onPageChange={(page) => setCurrentPage(Math.min(Math.max(page, 1), totalPages))}
+                onPageSizeChange={(size) => {
+                  setPageSize(size);
+                  setCurrentPage(1);
+                }}
+              />
             </div>
           )}
         </div>
       </div>
+
+      {/* Detail Pesan Modal */}
+      <DetailPesanModal
+        pesan={selectedPesan}
+        isOpen={selectedPesan !== null}
+        onClose={() => setSelectedPesan(null)}
+        onDelete={handleDeletePesan}
+      />
 
       {/* Delete Confirmation Modal */}
       {deletingId && (
@@ -312,14 +331,14 @@ export default function AdminKontakPage() {
               <button
                 type="button"
                 onClick={() => setDeletingId(null)}
-                className="inline-flex h-12 items-center justify-center rounded-lg border border-zinc-200 px-6 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
+                className="inline-flex h-12 items-center justify-center rounded-lg border border-zinc-200 px-6 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950 cursor-pointer"
               >
                 Batal
               </button>
               <button
                 type="button"
                 onClick={confirmDeletePesan}
-                className="inline-flex h-12 items-center justify-center rounded-lg bg-rose-600 px-6 text-sm font-semibold text-white transition hover:bg-rose-700"
+                className="inline-flex h-12 items-center justify-center rounded-lg bg-rose-600 px-6 text-sm font-semibold text-white transition hover:bg-rose-700 cursor-pointer"
               >
                 Hapus Pesan
               </button>
@@ -327,6 +346,6 @@ export default function AdminKontakPage() {
           </div>
         </div>
       )}
-    </AdminShell>
+    </div>
   );
 }

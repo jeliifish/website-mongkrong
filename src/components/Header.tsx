@@ -26,17 +26,6 @@ export default function Header({ variant = "overlay" }: HeaderProps) {
   const isOverlay = variant === "overlay";
 
   useEffect(() => {
-    if (!isOverlay) {
-      return;
-    }
-
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 32);
-    };
-
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
     const loadLogo = async () => {
       try {
         const { fetchLogoConfig } = await import("@/lib/profil-firestore");
@@ -50,8 +39,28 @@ export default function Header({ variant = "overlay" }: HeaderProps) {
     };
     void loadLogo();
 
+    const handleLogoUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent<string | null>;
+      setLogoUrl(customEvent.detail || null);
+    };
+    window.addEventListener("logoUpdated", handleLogoUpdate);
+
+    if (!isOverlay) {
+      return () => {
+        window.removeEventListener("logoUpdated", handleLogoUpdate);
+      };
+    }
+
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 32);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
     return () => {
       window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("logoUpdated", handleLogoUpdate);
     };
   }, [isOverlay]);
 
@@ -99,15 +108,15 @@ export default function Header({ variant = "overlay" }: HeaderProps) {
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
         <Link href="/" className={`flex items-center gap-3 ${brandTextClass}`}>
           {logoUrl ? (
-            <img src={logoUrl} alt="Logo Dusun" className="h-11 w-auto max-w-11 object-contain" />
+            <img src={logoUrl} alt="Logo Padukuhan" className="h-11 w-auto max-w-11 object-contain" />
           ) : (
             <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/60 bg-white/90 text-[0.68rem] font-bold tracking-[0.18em] text-emerald-800 shadow-sm">
-              DM
+              PM
             </div>
           )}
           <div>
             <p className="text-xl font-semibold leading-tight tracking-tight">
-              Dusun Mongkrong
+              Padukuhan Mongkrong
             </p>
             <p className={`text-sm ${brandSubtextClass}`}>
               Kalurahan Sampang
@@ -121,7 +130,7 @@ export default function Header({ variant = "overlay" }: HeaderProps) {
               key={item.label}
               href={item.href}
               aria-current={isActive(item.href) ? "page" : undefined}
-              className={`rounded-full px-3 py-2 text-sm font-semibold transition ${
+              className={`rounded-full px-3 py-2 text-sm font-semibold transition-all duration-300 ease-out ${
                 isActive(item.href) ? activeNavClass : inactiveNavClass
               }`}
             >

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import Table from "@/components/Table";
+import Pagination from "@/components/Pagination";
 import {
   fetchAdminProfiles,
   saveAdminProfile,
@@ -17,6 +18,10 @@ export default function AdminPenggunaPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingAdmin, setEditingAdmin] = useState<AdminProfile | null>(null);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
   // Form states
   const [name, setName] = useState("");
@@ -200,8 +205,13 @@ export default function AdminPenggunaPage() {
     { label: "Aksi", className: "text-right font-semibold pr-4" },
   ];
 
+  // Pagination calculations
+  const totalPages = Math.max(1, Math.ceil(admins.length / pageSize));
+  const activePage = Math.min(currentPage, totalPages);
+  const paginatedAdmins = admins.slice((activePage - 1) * pageSize, activePage * pageSize);
+
   // Build table rows
-  const tableRows = admins.map((admin) => {
+  const tableRows = paginatedAdmins.map((admin) => {
     // Format permissions list
     const activePerms: string[] = [];
     if (admin.role === "Super Admin") {
@@ -270,43 +280,7 @@ export default function AdminPenggunaPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header Halaman */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-zinc-200 pb-6">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">
-            Kelola Pengguna CMS
-          </p>
-          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-950">
-            Pengaturan Profil & Izin Akun
-          </h2>
-          <p className="mt-1 text-sm text-zinc-500">
-            Kelola profil dan hak akses admin yang terdaftar di Firestore.
-          </p>
-        </div>
-        {!showForm && (
-          <button
-            type="button"
-            onClick={() => setShowForm(true)}
-            className="inline-flex h-11 items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#1f7a4a_0%,#39a86c_100%)] px-5 text-sm font-semibold text-white shadow-md hover:shadow-lg transition cursor-pointer"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              className="h-4.5 w-4.5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <line x1="19" y1="8" x2="19" y2="14" />
-              <line x1="16" y1="11" x2="22" y2="11" />
-            </svg>
-            Tambah Profil Pengguna
-          </button>
-        )}
-      </div>
+      {/* Form Tambah/Edit Admin */}
 
       {/* Form Tambah/Edit Admin */}
       {showForm && (
@@ -510,13 +484,55 @@ export default function AdminPenggunaPage() {
 
       {/* Tabel Daftar Pengguna */}
       <section className="space-y-4">
-        <h3 className="text-lg font-bold text-zinc-950">Daftar Administrator Terdaftar</h3>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h3 className="text-lg font-bold text-zinc-950">
+            Daftar Administrator Terdaftar
+          </h3>
+          {!showForm && (
+            <button
+              type="button"
+              onClick={() => setShowForm(true)}
+              className="inline-flex h-11 items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#1f7a4a_0%,#39a86c_100%)] px-5 text-sm font-semibold text-white shadow-md hover:shadow-lg transition cursor-pointer"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="h-4.5 w-4.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <line x1="19" y1="8" x2="19" y2="14" />
+                <line x1="16" y1="11" x2="22" y2="11" />
+              </svg>
+              Tambah Profil Pengguna
+            </button>
+          )}
+        </div>
         <Table
           columns={tableColumns}
           rows={tableRows}
           gridTemplate="1.2fr 1.5fr 2fr 5rem"
           emptyMessage={isLoading ? "Memuat data admin..." : "Belum ada admin terdaftar."}
         />
+        {admins.length > 0 && (
+          <Pagination
+            currentPage={activePage}
+            totalPages={totalPages}
+            totalItems={admins.length}
+            pageSize={pageSize}
+            pageSizeOptions={[5, 10, 25, 50]}
+            itemLabel="pengguna"
+            onPageChange={(page) => setCurrentPage(Math.min(Math.max(page, 1), totalPages))}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setCurrentPage(1);
+            }}
+          />
+        )}
       </section>
     </div>
   );

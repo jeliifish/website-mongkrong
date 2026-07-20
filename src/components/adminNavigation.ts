@@ -35,4 +35,10 @@ export const adminNavigation = [
     title: "Kelola UMKM",
     subtitle: "Data usaha dan produk warga desa",
   },
+  {
+    label: "Pemetaan",
+    href: "/admin/pemetaan",
+    title: "Kelola Pemetaan",
+    subtitle: "Atur luas wilayah dan estimasi hasil panen",
+  },
 ] as const;

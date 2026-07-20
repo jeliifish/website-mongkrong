@@ -69,7 +69,7 @@ export default function AdminOverviewPanel() {
     <div className="space-y-6">
       {/* Welcome Banner */}
       <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm md:p-8">
-        <h2 className="text-3xl font-extrabold tracking-tight text-zinc-950 sm:text-4xl">
+        <h2 className="text-3xl font-semibold tracking-tight text-zinc-950 sm:text-4xl">
           Selamat Datang Kembali, {profile?.name || "admin"}!
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-zinc-500 max-w-3xl">

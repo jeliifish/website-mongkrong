@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { fetchStatistik } from "@/lib/statistik-firestore";
 import type { StatistikItem } from "@/types/statistik";
+import ScrollReveal from "@/components/ScrollReveal";
 
 export default function HomeStatistik({ noPadding }: { noPadding?: boolean }) {
   const [statistik, setStatistik] = useState<StatistikItem | null>(null);
@@ -101,6 +102,18 @@ export default function HomeStatistik({ noPadding }: { noPadding?: boolean }) {
     },
   ];
 
+  const customCards = (statistik.customStats || []).map((cs) => ({
+    label: cs.label,
+    value: cs.value,
+    icon: (
+      <svg className="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+    )
+  }));
+
+  const allCards = [...statCards, ...customCards, ...borderCards];
+
   return (
     <section className={noPadding ? "py-12" : "mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8"}>
       <div className="mb-10 text-center md:text-left">
@@ -113,23 +126,24 @@ export default function HomeStatistik({ noPadding }: { noPadding?: boolean }) {
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {[...statCards, ...borderCards].map((card) => (
-          <div
-            key={card.label}
-            className="flex items-center gap-4 rounded-2xl border border-zinc-200 bg-[#f8faf8] p-5 transition-all duration-300 hover:border-emerald-200 hover:bg-white hover:shadow-[0_12px_30px_rgba(16,185,129,0.04)]"
-          >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#e6f7ec]">
-              {card.icon}
+        {allCards.map((card, i) => (
+          <ScrollReveal key={card.label} animation="fade-up" delay={i * 80} duration={600} distance={25} className="h-full">
+            <div
+              className="flex h-full items-center gap-4 rounded-2xl border border-zinc-200 bg-[#f8faf8] p-5 transition-all duration-300 hover:border-emerald-200 hover:bg-white hover:shadow-[0_12px_30px_rgba(16,185,129,0.04)]"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#e6f7ec]">
+                {card.icon}
+              </div>
+              <div>
+                <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
+                  {card.label}
+                </span>
+                <p className="mt-1 text-base font-semibold text-zinc-900 sm:text-lg whitespace-pre-wrap leading-tight">
+                  {card.value}
+                </p>
+              </div>
             </div>
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                {card.label}
-              </span>
-              <p className="mt-1 text-base font-bold text-zinc-900 sm:text-lg whitespace-pre-wrap leading-tight">
-                {card.value}
-              </p>
-            </div>
-          </div>
+          </ScrollReveal>
         ))}
       </div>
     </section>

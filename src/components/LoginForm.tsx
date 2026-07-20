@@ -117,12 +117,6 @@ export default function LoginForm() {
         </Button>
       </form>
 
-      <div className="text-sm text-zinc-500">
-        Don&apos;t have an account?{" "}
-        <Link href="/" className="font-semibold text-[#1f7a4a]">
-          Hubungi admin utama
-        </Link>
-      </div>
     </>
   );
 }

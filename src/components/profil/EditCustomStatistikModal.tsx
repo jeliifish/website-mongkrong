@@ -96,7 +96,7 @@ function EditForm({
             Kelola Statistik
           </p>
           <h2 className="text-2xl font-semibold tracking-tight text-zinc-950">
-            Edit Statistik Dinamis
+            Edit Statistik Tambahan
           </h2>
         </div>
 

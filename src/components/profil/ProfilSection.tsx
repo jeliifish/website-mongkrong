@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import EditProfilModal from "@/components/profil/EditProfilModal";
 import EditStatistikModal from "@/components/profil/EditStatistikModal";
 import EditCustomStatistikModal from "@/components/profil/EditCustomStatistikModal";
+import DeleteCustomStatistikModal from "@/components/profil/DeleteCustomStatistikModal";
 import { fetchStatistik, updateStatistik } from "@/lib/statistik-firestore";
 import { fetchProfilItems, updateProfilItem, type ProfilItem } from "@/lib/profil-firestore";
 import type { StatistikItem, CustomStatistikItem } from "@/types/statistik";
@@ -55,6 +56,7 @@ export default function ProfilSection({ items }: ProfilSectionProps) {
   const [newValue, setNewValue] = useState("");
   const [isAdding, setIsAdding] = useState(false);
   const [editingCustomStat, setEditingCustomStat] = useState<CustomStatistikItem | null>(null);
+  const [deletingCustomStat, setDeletingCustomStat] = useState<CustomStatistikItem | null>(null);
 
   const handleSaveCustomStat = async (id: string, label: string, value: string) => {
     if (!statistik) return;
@@ -101,7 +103,6 @@ export default function ProfilSection({ items }: ProfilSectionProps) {
 
   const handleDeleteCustomStat = async (id: string) => {
     if (!statistik) return;
-    if (!confirm("Apakah Anda yakin ingin menghapus statistik ini?")) return;
 
     try {
       const updatedCustomStats = (statistik.customStats || []).filter((item) => item.id !== id);
@@ -229,7 +230,7 @@ export default function ProfilSection({ items }: ProfilSectionProps) {
                 <svg className="h-5 w-5 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                 </svg>
-                <h4 className="text-lg font-semibold text-zinc-900">Kelola Statistik Desa (Dinamis)</h4>
+                <h4 className="text-lg font-semibold text-zinc-900">Kelola Statistik Tambahan</h4>
               </div>
 
               {/* LIST OF DYNAMIC STATS */}
@@ -242,8 +243,11 @@ export default function ProfilSection({ items }: ProfilSectionProps) {
                     >
                       <button
                         type="button"
-                        onClick={() => setEditingCustomStat(cs)}
-                        className="absolute right-12 top-3 hidden group-hover:flex items-center justify-center h-8 w-8 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingCustomStat(cs);
+                        }}
+                        className="absolute right-12 top-3 z-20 flex items-center justify-center h-8 w-8 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition shadow-sm"
                         title="Edit statistik"
                       >
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -252,8 +256,11 @@ export default function ProfilSection({ items }: ProfilSectionProps) {
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleDeleteCustomStat(cs.id)}
-                        className="absolute right-3 top-3 hidden group-hover:flex items-center justify-center h-8 w-8 rounded-full bg-rose-50 text-rose-600 hover:bg-rose-100 transition"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeletingCustomStat(cs);
+                        }}
+                        className="absolute right-3 top-3 z-20 flex items-center justify-center h-8 w-8 rounded-full bg-rose-50 text-rose-600 hover:bg-rose-100 transition shadow-sm"
                         title="Hapus statistik"
                       >
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -270,7 +277,7 @@ export default function ProfilSection({ items }: ProfilSectionProps) {
                   ))
                 ) : (
                   <div className="col-span-full py-6 text-center text-sm text-zinc-500 border border-dashed border-zinc-200 rounded-2xl">
-                    Belum ada statistik tambahan/dinamis.
+                    Belum ada statistik tambahan.
                   </div>
                 )}
               </div>
@@ -347,6 +354,13 @@ export default function ProfilSection({ items }: ProfilSectionProps) {
         isOpen={editingCustomStat !== null}
         onClose={() => setEditingCustomStat(null)}
         onSave={handleSaveCustomStat}
+      />
+
+      <DeleteCustomStatistikModal
+        item={deletingCustomStat}
+        isOpen={deletingCustomStat !== null}
+        onClose={() => setDeletingCustomStat(null)}
+        onConfirm={handleDeleteCustomStat}
       />
     </>
   );

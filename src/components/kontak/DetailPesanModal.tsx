@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import ModalPortal from "@/components/ModalPortal";
 import type { PesanMasuk } from "@/types/kontak";
 
 type DetailPesanModalProps = {
@@ -48,13 +49,14 @@ export default function DetailPesanModal({
   const initial = pesan.nama ? pesan.nama.trim().charAt(0).toUpperCase() : "P";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/40 p-4 sm:p-6 backdrop-blur-sm transition-opacity">
-      <button
-        type="button"
-        aria-label="Tutup modal"
-        className="absolute inset-0 cursor-default"
-        onClick={onClose}
-      />
+    <ModalPortal>
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-950/60 p-4 sm:p-6 backdrop-blur-sm">
+        <button
+          type="button"
+          aria-label="Tutup modal"
+          className="fixed inset-0 cursor-default"
+          onClick={onClose}
+        />
 
       <div className="relative z-10 w-full max-w-2xl overflow-hidden rounded-3xl border border-zinc-200/90 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
         {/* Modal Header */}
@@ -168,5 +170,6 @@ export default function DetailPesanModal({
         </div>
       </div>
     </div>
+  </ModalPortal>
   );
 }

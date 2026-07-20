@@ -59,12 +59,11 @@ export default function PublicKontakPage() {
     <>
       {/* Page Title */}
       <div className="text-center">
-        <h1 className="text-4xl font-bold tracking-tight text-zinc-900 sm:text-5xl">
-          Hubungi Kami
+        <h1 className="text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl lg:text-5xl">
+          Hubungi Padukuhan Mongkrong
         </h1>
-        <p className="mt-4 max-w-2xl mx-auto text-base leading-7 text-zinc-600">
-          Punya pertanyaan atau masukan untuk Dusun Mongkrong? Jangan ragu untuk
-          mengirim pesan kepada kami melalui formulir di bawah ini.
+        <p className="mt-3 text-sm sm:text-base text-zinc-500 max-w-2xl mx-auto">
+          Layanan informasi, masukan warga, dan lokasi Balai Padukuhan Mongkrong
         </p>
       </div>
 

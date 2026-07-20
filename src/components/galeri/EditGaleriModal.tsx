@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 
 import Button from "@/components/Button";
+import ModalPortal from "@/components/ModalPortal";
 import type { GaleriItem } from "@/types/galeri";
 
 type EditGaleriModalProps = {
@@ -43,16 +44,18 @@ export default function EditGaleriModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/45 p-6 backdrop-blur-[2px]">
-      <button
-        type="button"
-        aria-label="Tutup modal"
-        className="absolute inset-0 cursor-default"
-        onClick={onClose}
-      />
+    <ModalPortal>
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-950/60 p-4 sm:p-6 backdrop-blur-sm">
+        <button
+          type="button"
+          aria-label="Tutup modal"
+          className="fixed inset-0 cursor-default"
+          onClick={onClose}
+        />
 
-      <EditGaleriForm key={galeri.id} galeri={galeri} onClose={onClose} onSave={onSave} />
-    </div>
+        <EditGaleriForm key={galeri.id} galeri={galeri} onClose={onClose} onSave={onSave} />
+      </div>
+    </ModalPortal>
   );
 }
 

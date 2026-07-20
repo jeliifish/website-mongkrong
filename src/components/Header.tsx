@@ -14,16 +14,12 @@ const navigation = [
   { label: "Kontak", href: "/kontak" },
 ];
 
-type HeaderProps = {
-  variant?: "overlay" | "solid";
-};
-
-export default function Header({ variant = "overlay" }: HeaderProps) {
+export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const pathname = usePathname();
-  const isOverlay = variant === "overlay";
+  const isHomePage = pathname === "/";
 
   useEffect(() => {
     const loadLogo = async () => {
@@ -45,14 +41,8 @@ export default function Header({ variant = "overlay" }: HeaderProps) {
     };
     window.addEventListener("logoUpdated", handleLogoUpdate);
 
-    if (!isOverlay) {
-      return () => {
-        window.removeEventListener("logoUpdated", handleLogoUpdate);
-      };
-    }
-
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 32);
+      setIsScrolled(window.scrollY > 20);
     };
 
     handleScroll();
@@ -62,55 +52,31 @@ export default function Header({ variant = "overlay" }: HeaderProps) {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("logoUpdated", handleLogoUpdate);
     };
-  }, [isOverlay]);
+  }, []);
 
   const isActive = (href: string) => {
     if (href === "/") {
       return pathname === "/";
     }
-
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
-  const useSolidTheme = !isOverlay || isScrolled;
-  const headerClass = useSolidTheme
-    ? "fixed inset-x-0 top-0 z-50 border-b border-emerald-950/15 bg-[#173b2a]/95 text-white shadow-sm backdrop-blur"
-    : "fixed inset-x-0 top-0 z-50 text-white";
-  const brandTextClass = "text-white";
-  const brandSubtextClass = useSolidTheme ? "text-emerald-100/80" : "text-white/85";
-  const activeNavClass = useSolidTheme
-    ? "bg-white/12 text-white"
-    : "bg-white/12 text-white";
-  const inactiveNavClass = useSolidTheme
-    ? "text-emerald-50 hover:text-white"
-    : "text-white hover:text-white/75";
-  const loginButtonClass = useSolidTheme
-    ? "border-white/20 text-white hover:bg-white/10"
-    : "border-white/55 text-white hover:bg-white/10";
-  const mobileButtonClass = useSolidTheme
-    ? "border-white/15 bg-white/10 text-white hover:bg-white/15"
-    : "border-white/40 bg-white/10 text-white hover:bg-white/15";
-  const mobileMenuClass = useSolidTheme
-    ? "mx-4 rounded-2xl border border-white/10 bg-[#163423] px-4 py-4 text-white shadow-lg backdrop-blur md:hidden"
-    : "mx-4 rounded-2xl border border-white/15 bg-[#10361f]/92 px-4 py-4 text-white shadow-lg backdrop-blur md:hidden";
-  const mobileActiveClass = useSolidTheme
-    ? "bg-white/12 text-white"
-    : "bg-white/14 text-white";
-  const mobileInactiveClass = useSolidTheme
-    ? "text-emerald-50 hover:bg-white/10"
-    : "text-white hover:bg-white/10";
-  const mobileLoginClass = useSolidTheme
-    ? "border-white/15 text-white hover:bg-white/10"
-    : "border-white/30 text-white hover:bg-white/10";
+  const isSolid = !isHomePage || isScrolled;
+
+  const headerClass = isSolid
+    ? "fixed inset-x-0 top-0 z-50 border-b border-emerald-900/30 bg-[#173b2a]/95 text-white shadow-lg backdrop-blur-md transition-all duration-300 py-3 sm:py-4"
+    : "fixed inset-x-0 top-0 z-50 bg-gradient-to-b from-black/75 via-black/35 to-transparent text-white transition-all duration-300 py-4 sm:py-5";
+
+  const brandSubtextClass = isSolid ? "text-emerald-100/80" : "text-white/85";
 
   return (
     <header className={headerClass}>
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
-        <Link href="/" className={`flex items-center gap-3 ${brandTextClass}`}>
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <Link href="/" className="flex items-center gap-3 text-white group">
           {logoUrl ? (
-            <img src={logoUrl} alt="Logo Padukuhan" className="h-11 w-auto max-w-11 object-contain" />
+            <img src={logoUrl} alt="Logo Padukuhan" className="h-11 w-auto max-w-11 object-contain transition group-hover:scale-105" />
           ) : (
-            <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/60 bg-white/90 text-[0.68rem] font-bold tracking-[0.18em] text-emerald-800 shadow-sm">
+            <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/60 bg-white/90 text-[0.68rem] font-bold tracking-[0.18em] text-emerald-800 shadow-sm transition group-hover:scale-105">
               PM
             </div>
           )}
@@ -124,75 +90,92 @@ export default function Header({ variant = "overlay" }: HeaderProps) {
           </div>
         </Link>
 
-        <nav className="hidden items-center gap-7 md:flex">
-          {navigation.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              aria-current={isActive(item.href) ? "page" : undefined}
-              className={`rounded-full px-3 py-2 text-sm font-semibold transition-all duration-300 ease-out ${
-                isActive(item.href) ? activeNavClass : inactiveNavClass
-              }`}
-            >
-              {item.label}
-            </Link>
-          ))}
+        {/* Desktop Navigation */}
+        <nav className="hidden items-center gap-1.5 md:flex">
+          {navigation.map((item) => {
+            const active = isActive(item.href);
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={`relative rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+                  active
+                    ? "bg-white/18 text-white shadow-sm font-bold"
+                    : "text-emerald-50/90 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
           <Link
             href="/login"
-            className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${loginButtonClass}`}
+            className="ml-3 rounded-full border border-white/30 px-5 py-2 text-sm font-semibold text-white transition hover:border-white/60 hover:bg-white/10 shadow-sm"
           >
             Login
           </Link>
         </nav>
 
+        {/* Mobile Hamburger Button */}
         <button
           type="button"
           aria-expanded={isOpen}
           aria-controls="mobile-menu"
           onClick={() => setIsOpen((open) => !open)}
-          className={`inline-flex h-10 w-10 items-center justify-center rounded-full border transition md:hidden ${mobileButtonClass}`}
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20 md:hidden cursor-pointer"
         >
           <span className="sr-only">Buka navigasi</span>
           <div className="space-y-1.5">
             <span
-              className={`block h-0.5 w-5 rounded-full bg-current transition ${isOpen ? "translate-y-2 rotate-45" : ""}`}
+              className={`block h-0.5 w-5 rounded-full bg-current transition-transform duration-300 ${
+                isOpen ? "translate-y-2 rotate-45" : ""
+              }`}
             />
             <span
-              className={`block h-0.5 w-5 rounded-full bg-current transition ${isOpen ? "opacity-0" : ""}`}
+              className={`block h-0.5 w-5 rounded-full bg-current transition-opacity duration-300 ${
+                isOpen ? "opacity-0" : ""
+              }`}
             />
             <span
-              className={`block h-0.5 w-5 rounded-full bg-current transition ${isOpen ? "-translate-y-2 -rotate-45" : ""}`}
+              className={`block h-0.5 w-5 rounded-full bg-current transition-transform duration-300 ${
+                isOpen ? "-translate-y-2 -rotate-45" : ""
+              }`}
             />
           </div>
         </button>
       </div>
 
-      {isOpen ? (
-        <div id="mobile-menu" className={mobileMenuClass}>
-          <nav className="flex flex-col gap-2">
-            {navigation.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                aria-current={isActive(item.href) ? "page" : undefined}
-                onClick={() => setIsOpen(false)}
-                className={`rounded-xl px-4 py-3 text-sm font-medium transition ${
-                  isActive(item.href) ? mobileActiveClass : mobileInactiveClass
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
+      {/* Mobile Menu Dropdown */}
+      {isOpen && (
+        <div id="mobile-menu" className="mx-4 mt-3 rounded-2xl border border-white/15 bg-[#143525]/95 px-4 py-4 text-white shadow-xl backdrop-blur-md md:hidden">
+          <nav className="flex flex-col gap-1.5">
+            {navigation.map((item) => {
+              const active = isActive(item.href);
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  onClick={() => setIsOpen(false)}
+                  className={`rounded-xl px-4 py-3 text-sm font-medium transition ${
+                    active ? "bg-white/18 text-white font-bold" : "text-emerald-50 hover:bg-white/10"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
             <Link
               href="/login"
               onClick={() => setIsOpen(false)}
-              className={`mt-2 rounded-xl border px-4 py-3 text-center text-sm font-semibold transition ${mobileLoginClass}`}
+              className="mt-2 rounded-xl border border-white/30 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-white/10"
             >
               Login
             </Link>
           </nav>
         </div>
-      ) : null}
+      )}
     </header>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import type { BeritaItem } from "@/types/berita";
+import ModalPortal from "@/components/ModalPortal";
 
 type DetailBeritaModalProps = {
   berita: BeritaItem | null;
@@ -43,13 +44,14 @@ export default function DetailBeritaModal({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/45 p-6 backdrop-blur-[2px]">
-      <button
-        type="button"
-        aria-label="Tutup modal"
-        className="absolute inset-0 cursor-default"
-        onClick={onClose}
-      />
+    <ModalPortal>
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-950/60 p-4 sm:p-6 backdrop-blur-sm">
+        <button
+          type="button"
+          aria-label="Tutup modal"
+          className="fixed inset-0 cursor-default"
+          onClick={onClose}
+        />
 
       <div className="relative z-10 w-full max-w-3xl overflow-hidden border border-zinc-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
         <div className="border-b border-zinc-200 px-8 py-6">
@@ -146,6 +148,7 @@ export default function DetailBeritaModal({
         </div>
       </div>
     </div>
+  </ModalPortal>
   );
 }
 

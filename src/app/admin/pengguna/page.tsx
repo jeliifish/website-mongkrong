@@ -11,6 +11,7 @@ import {
   createAuthUserOnClient,
   type AdminProfile,
 } from "@/lib/admin-firestore";
+import DeletePenggunaModal from "@/components/pengguna/DeletePenggunaModal";
 
 export default function AdminPenggunaPage() {
   const { user: currentUser } = useAuth();
@@ -18,6 +19,8 @@ export default function AdminPenggunaPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingAdmin, setEditingAdmin] = useState<AdminProfile | null>(null);
+  const [deletingAdmin, setDeletingAdmin] = useState<AdminProfile | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -109,23 +112,26 @@ export default function AdminPenggunaPage() {
     setShowForm(true);
   }
 
-  async function handleDelete(admin: AdminProfile) {
+  function handleDelete(admin: AdminProfile) {
     if (admin.uid === currentUser?.uid) {
       alert("Anda tidak bisa menghapus akun Anda sendiri.");
       return;
     }
-    const confirmDelete = window.confirm(
-      `Apakah Anda yakin ingin menghapus/menonaktifkan hak akses untuk admin ${admin.name}?`
-    );
-    if (!confirmDelete) return;
+    setDeletingAdmin(admin);
+  }
 
+  async function handleConfirmDelete(uid: string) {
+    if (!deletingAdmin) return;
+    setIsDeleting(true);
     try {
-      await deleteAdminProfile(admin.uid);
-      setAdmins((prev) => prev.filter((a) => a.uid !== admin.uid));
-      alert("Profil admin berhasil dihapus dari database.");
+      await deleteAdminProfile(uid);
+      setAdmins((prev) => prev.filter((a) => a.uid !== uid));
+      setDeletingAdmin(null);
     } catch (err) {
       console.error(err);
       alert("Gagal menghapus admin.");
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -534,6 +540,14 @@ export default function AdminPenggunaPage() {
           />
         )}
       </section>
+
+      <DeletePenggunaModal
+        admin={deletingAdmin}
+        isOpen={deletingAdmin !== null}
+        onClose={() => setDeletingAdmin(null)}
+        onConfirm={handleConfirmDelete}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }

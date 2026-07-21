@@ -241,8 +241,8 @@ export default function AdminPenggunaPage() {
           <p className="text-zinc-500 text-xs">{admin.email}</p>
           <span
             className={`inline-block mt-1 text-[0.65rem] font-bold uppercase px-2 py-0.5 rounded-full ${admin.role === "Super Admin"
-                ? "bg-emerald-100 text-emerald-800"
-                : "bg-zinc-100 text-zinc-700"
+              ? "bg-emerald-100 text-emerald-800"
+              : "bg-zinc-100 text-zinc-700"
               }`}
           >
             {admin.role}
@@ -256,8 +256,8 @@ export default function AdminPenggunaPage() {
               <span
                 key={perm}
                 className={`text-xs px-2 py-0.5 rounded border ${admin.role === "Super Admin"
-                    ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-                    : "bg-zinc-50 text-zinc-600 border-zinc-100"
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                  : "bg-zinc-50 text-zinc-600 border-zinc-100"
                   }`}
               >
                 {perm}
@@ -284,44 +284,6 @@ export default function AdminPenggunaPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header Halaman */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-zinc-200 pb-6">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700">
-            Kelola Pengguna
-          </p>
-          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-950">
-            Pengaturan Profil & Izin Akun
-          </h2>
-          <p className="mt-1 text-sm text-zinc-500">
-            Kelola profil dan hak akses admin yang terdaftar di Firestore.
-          </p>
-        </div>
-        {!showForm && (
-          <button
-            type="button"
-            onClick={() => setShowForm(true)}
-            className="inline-flex h-11 items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#1f7a4a_0%,#39a86c_100%)] px-5 text-sm font-semibold text-white shadow-md hover:shadow-lg transition cursor-pointer"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              className="h-4.5 w-4.5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <line x1="19" y1="8" x2="19" y2="14" />
-              <line x1="16" y1="11" x2="22" y2="11" />
-            </svg>
-            Tambah Profil Pengguna
-          </button>
-        )}
-      </div>
-
       {/* Form Tambah/Edit Admin */}
       {showForm && (
         <section className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
@@ -408,10 +370,10 @@ export default function AdminPenggunaPage() {
                   {/* Kelola Profil Desa */}
                   <label
                     className={`flex items-center gap-3 rounded-xl border border-zinc-200 p-3.5 text-sm font-semibold select-none cursor-pointer transition ${role === "Super Admin"
-                        ? "bg-zinc-50 border-zinc-200 text-zinc-400 cursor-not-allowed"
-                        : permissions.profil
-                          ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-                          : "bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+                      ? "bg-zinc-50 border-zinc-200 text-zinc-400 cursor-not-allowed"
+                      : permissions.profil
+                        ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                        : "bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50"
                       }`}
                   >
                     <input
@@ -427,10 +389,10 @@ export default function AdminPenggunaPage() {
                   {/* Kelola Galeri */}
                   <label
                     className={`flex items-center gap-3 rounded-xl border border-zinc-200 p-3.5 text-sm font-semibold select-none cursor-pointer transition ${role === "Super Admin"
-                        ? "bg-zinc-50 border-zinc-200 text-zinc-400 cursor-not-allowed"
-                        : permissions.galeri
-                          ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-                          : "bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+                      ? "bg-zinc-50 border-zinc-200 text-zinc-400 cursor-not-allowed"
+                      : permissions.galeri
+                        ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                        : "bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50"
                       }`}
                   >
                     <input
@@ -446,10 +408,10 @@ export default function AdminPenggunaPage() {
                   {/* Kelola UMKM */}
                   <label
                     className={`flex items-center gap-3 rounded-xl border border-zinc-200 p-3.5 text-sm font-semibold select-none cursor-pointer transition ${role === "Super Admin"
-                        ? "bg-zinc-50 border-zinc-200 text-zinc-400 cursor-not-allowed"
-                        : permissions.umkm
-                          ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-                          : "bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+                      ? "bg-zinc-50 border-zinc-200 text-zinc-400 cursor-not-allowed"
+                      : permissions.umkm
+                        ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                        : "bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50"
                       }`}
                   >
                     <input
@@ -465,10 +427,10 @@ export default function AdminPenggunaPage() {
                   {/* Kelola Berita */}
                   <label
                     className={`flex items-center gap-3 rounded-xl border border-zinc-200 p-3.5 text-sm font-semibold select-none cursor-pointer transition ${role === "Super Admin"
-                        ? "bg-zinc-50 border-zinc-200 text-zinc-400 cursor-not-allowed"
-                        : permissions.berita
-                          ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-                          : "bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+                      ? "bg-zinc-50 border-zinc-200 text-zinc-400 cursor-not-allowed"
+                      : permissions.berita
+                        ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                        : "bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50"
                       }`}
                   >
                     <input

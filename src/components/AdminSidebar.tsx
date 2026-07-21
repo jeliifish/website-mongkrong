@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
@@ -17,7 +17,32 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const { profile } = useAuth();
+
+  useEffect(() => {
+    const loadLogo = async () => {
+      try {
+        const { fetchLogoConfig } = await import("@/lib/profil-firestore");
+        const config = await fetchLogoConfig();
+        if (config && config.imageUrl) {
+          setLogoUrl(config.imageUrl);
+        }
+      } catch (err) {
+        console.error("Gagal load logo di AdminSidebar:", err);
+      }
+    };
+    void loadLogo();
+
+    const handleLogoUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent<string | null>;
+      setLogoUrl(customEvent.detail || null);
+    };
+    window.addEventListener("logoUpdated", handleLogoUpdate);
+    return () => {
+      window.removeEventListener("logoUpdated", handleLogoUpdate);
+    };
+  }, []);
 
   async function handleLogout() {
     setIsSigningOut(true);
@@ -63,12 +88,20 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
       >
         <div className="flex items-start justify-between gap-4 px-5 py-5 sm:px-6 lg:px-7 lg:py-7">
           <Link href="/" className="flex min-w-0 items-center gap-3" onClick={onClose}>
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#1f7a4a_0%,#39a86c_100%)] text-base font-semibold text-white shadow-[0_14px_30px_rgba(31,122,74,0.18)] lg:h-14 lg:w-14 lg:text-lg">
-              DM
-            </div>
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt="Logo Padukuhan"
+                className="h-12 w-12 object-contain lg:h-14 lg:w-14"
+              />
+            ) : (
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#1f7a4a_0%,#39a86c_100%)] text-base font-semibold text-white shadow-[0_14px_30px_rgba(31,122,74,0.18)] lg:h-14 lg:w-14 lg:text-lg">
+                PM
+              </div>
+            )}
             <div className="min-w-0">
               <p className="truncate text-base font-semibold tracking-tight text-zinc-950 lg:text-[1.05rem]">
-                Desa Mongkrong
+                Padukuhan Mongkrong
               </p>
               <p className="text-sm text-zinc-500">Panel pengelolaan website</p>
             </div>

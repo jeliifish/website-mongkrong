@@ -27,7 +27,7 @@ type BeritaTableSectionProps = {
 };
 
 export default function BeritaTableSection({ items }: BeritaTableSectionProps) {
-  const pageSize = 5;
+  const [pageSize, setPageSize] = useState(5);
   const [beritaItems, setBeritaItems] = useState<BeritaItem[]>(() =>
     isFirebaseConfigured ? [] : items,
   );
@@ -358,7 +358,13 @@ export default function BeritaTableSection({ items }: BeritaTableSectionProps) {
             totalPages={totalPages}
             totalItems={filteredItems.length}
             pageSize={pageSize}
+            pageSizeOptions={[5, 10, 25, 50]}
+            itemLabel="berita"
             onPageChange={(page) => setCurrentPage(Math.min(Math.max(page, 1), totalPages))}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setCurrentPage(1);
+            }}
           />
         </section>
       </div>

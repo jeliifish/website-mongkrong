@@ -13,8 +13,8 @@ import {
 import { db, isFirebaseConfigured } from "@/lib/firebase";
 import type { KontakInfo, PesanMasuk, NewPesanInput } from "@/types/kontak";
 
-const KONTAK_DOC_PATH = "kontak/info";
 const PESAN_COLLECTION = "pesan";
+const LOCAL_PESAN_KEY = "mongkrong_pesan_masuk";
 
 export const fallbackKontakInfo: KontakInfo = {
   alamat:
@@ -22,6 +22,25 @@ export const fallbackKontakInfo: KontakInfo = {
   telepon: "",
   email: "",
 };
+
+function getLocalPesan(): PesanMasuk[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const data = localStorage.getItem(LOCAL_PESAN_KEY);
+    return data ? (JSON.parse(data) as PesanMasuk[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalPesan(items: PesanMasuk[]) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(LOCAL_PESAN_KEY, JSON.stringify(items));
+  } catch (err) {
+    console.error("Gagal menyimpan pesan ke localStorage:", err);
+  }
+}
 
 // ─── Kontak Info ────────────────────────────────────────────
 
@@ -63,15 +82,16 @@ export async function updateKontakInfo(info: KontakInfo): Promise<void> {
 // ─── Pesan Masuk ────────────────────────────────────────────
 
 export async function fetchPesanMasuk(): Promise<PesanMasuk[]> {
+  const localList = getLocalPesan();
   if (!db || !isFirebaseConfigured) {
-    return [];
+    return localList;
   }
 
   try {
     const snapshot = await getDocs(
       query(collection(db, PESAN_COLLECTION), orderBy("createdAt", "desc"))
     );
-    return snapshot.docs.map((d) => {
+    const firestoreList = snapshot.docs.map((d) => {
       const data = d.data();
       return {
         id: d.id,
@@ -82,30 +102,67 @@ export async function fetchPesanMasuk(): Promise<PesanMasuk[]> {
         createdAt: data.createdAt || 0,
       };
     });
+
+    const combined = [...firestoreList];
+    for (const item of localList) {
+      if (!combined.some((p) => p.id === item.id)) {
+        combined.push(item);
+      }
+    }
+    combined.sort((a, b) => b.createdAt - a.createdAt);
+    return combined;
   } catch (error) {
-    console.error("Gagal memuat pesan masuk:", error);
-    return [];
+    console.error(
+      "Gagal memuat pesan masuk dari Firestore, menggunakan data lokal:",
+      error
+    );
+    return localList;
   }
 }
 
 export async function createPesan(input: NewPesanInput): Promise<void> {
-  if (!db || !isFirebaseConfigured) {
-    throw new Error("Firebase belum dikonfigurasi.");
-  }
-
-  await addDoc(collection(db, PESAN_COLLECTION), {
+  const newPesan: PesanMasuk = {
+    id: "local_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7),
     nama: input.nama.trim(),
     email: input.email.trim(),
     subjek: input.subjek.trim(),
     pesan: input.pesan.trim(),
     createdAt: Date.now(),
-  });
+  };
+
+  if (db && isFirebaseConfigured) {
+    try {
+      await addDoc(collection(db, PESAN_COLLECTION), {
+        nama: newPesan.nama,
+        email: newPesan.email,
+        subjek: newPesan.subjek,
+        pesan: newPesan.pesan,
+        createdAt: newPesan.createdAt,
+      });
+      return;
+    } catch (error) {
+      console.warn(
+        "Gagal menyimpan pesan ke Firestore (Permission error/Network issue), menyimpan ke penyimpanan lokal sebagai fallback:",
+        error
+      );
+    }
+  }
+
+  // Fallback to localStorage if Firebase is not configured or permission denied
+  const currentLocal = getLocalPesan();
+  saveLocalPesan([newPesan, ...currentLocal]);
 }
 
 export async function deletePesan(id: string): Promise<void> {
-  if (!db || !isFirebaseConfigured) {
-    throw new Error("Firebase belum dikonfigurasi.");
-  }
+  const currentLocal = getLocalPesan();
+  const updatedLocal = currentLocal.filter((p) => p.id !== id);
+  saveLocalPesan(updatedLocal);
 
-  await deleteDoc(doc(db, PESAN_COLLECTION, id));
+  if (db && isFirebaseConfigured && !id.startsWith("local_")) {
+    try {
+      await deleteDoc(doc(db, PESAN_COLLECTION, id));
+    } catch (error) {
+      console.error("Gagal menghapus pesan dari Firestore:", error);
+    }
+  }
 }

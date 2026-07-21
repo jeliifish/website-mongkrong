@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import Table from "@/components/Table";
+import Pagination from "@/components/Pagination";
 import {
   fetchAdminProfiles,
   saveAdminProfile,
@@ -10,6 +11,7 @@ import {
   createAuthUserOnClient,
   type AdminProfile,
 } from "@/lib/admin-firestore";
+import DeletePenggunaModal from "@/components/pengguna/DeletePenggunaModal";
 
 export default function AdminPenggunaPage() {
   const { user: currentUser } = useAuth();
@@ -17,6 +19,12 @@ export default function AdminPenggunaPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingAdmin, setEditingAdmin] = useState<AdminProfile | null>(null);
+  const [deletingAdmin, setDeletingAdmin] = useState<AdminProfile | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
   // Form states
   const [name, setName] = useState("");
@@ -104,23 +112,26 @@ export default function AdminPenggunaPage() {
     setShowForm(true);
   }
 
-  async function handleDelete(admin: AdminProfile) {
+  function handleDelete(admin: AdminProfile) {
     if (admin.uid === currentUser?.uid) {
       alert("Anda tidak bisa menghapus akun Anda sendiri.");
       return;
     }
-    const confirmDelete = window.confirm(
-      `Apakah Anda yakin ingin menghapus/menonaktifkan hak akses untuk admin ${admin.name}?`
-    );
-    if (!confirmDelete) return;
+    setDeletingAdmin(admin);
+  }
 
+  async function handleConfirmDelete(uid: string) {
+    if (!deletingAdmin) return;
+    setIsDeleting(true);
     try {
-      await deleteAdminProfile(admin.uid);
-      setAdmins((prev) => prev.filter((a) => a.uid !== admin.uid));
-      alert("Profil admin berhasil dihapus dari database.");
+      await deleteAdminProfile(uid);
+      setAdmins((prev) => prev.filter((a) => a.uid !== uid));
+      setDeletingAdmin(null);
     } catch (err) {
       console.error(err);
       alert("Gagal menghapus admin.");
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -200,8 +211,13 @@ export default function AdminPenggunaPage() {
     { label: "Aksi", className: "text-right font-semibold pr-4" },
   ];
 
+  // Pagination calculations
+  const totalPages = Math.max(1, Math.ceil(admins.length / pageSize));
+  const activePage = Math.min(currentPage, totalPages);
+  const paginatedAdmins = admins.slice((activePage - 1) * pageSize, activePage * pageSize);
+
   // Build table rows
-  const tableRows = admins.map((admin) => {
+  const tableRows = paginatedAdmins.map((admin) => {
     // Format permissions list
     const activePerms: string[] = [];
     if (admin.role === "Super Admin") {
@@ -504,14 +520,64 @@ export default function AdminPenggunaPage() {
 
       {/* Tabel Daftar Pengguna */}
       <section className="space-y-4">
-        <h3 className="text-lg font-bold text-zinc-950">Daftar Administrator Terdaftar</h3>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h3 className="text-lg font-bold text-zinc-950">
+            Daftar Administrator Terdaftar
+          </h3>
+          {!showForm && (
+            <button
+              type="button"
+              onClick={() => setShowForm(true)}
+              className="inline-flex h-11 items-center gap-2 rounded-2xl bg-[linear-gradient(135deg,#1f7a4a_0%,#39a86c_100%)] px-5 text-sm font-semibold text-white shadow-md hover:shadow-lg transition cursor-pointer"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="h-4.5 w-4.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <line x1="19" y1="8" x2="19" y2="14" />
+                <line x1="16" y1="11" x2="22" y2="11" />
+              </svg>
+              Tambah Profil Pengguna
+            </button>
+          )}
+        </div>
         <Table
           columns={tableColumns}
           rows={tableRows}
           gridTemplate="1.2fr 1.5fr 2fr 5rem"
           emptyMessage={isLoading ? "Memuat data admin..." : "Belum ada admin terdaftar."}
         />
+        {admins.length > 0 && (
+          <Pagination
+            currentPage={activePage}
+            totalPages={totalPages}
+            totalItems={admins.length}
+            pageSize={pageSize}
+            pageSizeOptions={[5, 10, 25, 50]}
+            itemLabel="pengguna"
+            onPageChange={(page) => setCurrentPage(Math.min(Math.max(page, 1), totalPages))}
+            onPageSizeChange={(size) => {
+              setPageSize(size);
+              setCurrentPage(1);
+            }}
+          />
+        )}
       </section>
+
+      <DeletePenggunaModal
+        admin={deletingAdmin}
+        isOpen={deletingAdmin !== null}
+        onClose={() => setDeletingAdmin(null)}
+        onConfirm={handleConfirmDelete}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }

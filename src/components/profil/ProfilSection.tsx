@@ -7,7 +7,16 @@ import EditStatistikModal from "@/components/profil/EditStatistikModal";
 import EditCustomStatistikModal from "@/components/profil/EditCustomStatistikModal";
 import DeleteCustomStatistikModal from "@/components/profil/DeleteCustomStatistikModal";
 import { fetchStatistik, updateStatistik } from "@/lib/statistik-firestore";
-import { fetchProfilItems, updateProfilItem, type ProfilItem } from "@/lib/profil-firestore";
+import {
+  fetchProfilItems,
+  updateProfilItem,
+  fetchLogoConfig,
+  updateLogoConfig,
+  deleteLogoConfig,
+  type ProfilItem,
+  type LogoConfig,
+} from "@/lib/profil-firestore";
+import { isCloudinaryConfigured, uploadImageToCloudinary } from "@/lib/cloudinary-upload";
 import type { StatistikItem, CustomStatistikItem } from "@/types/statistik";
 
 type ProfilSectionProps = {
@@ -19,18 +28,90 @@ export default function ProfilSection({ items }: ProfilSectionProps) {
   const [editingItem, setEditingItem] = useState<ProfilItem | null>(null);
   const [statistik, setStatistik] = useState<StatistikItem | null>(null);
   const [isEditingStatistik, setIsEditingStatistik] = useState(false);
+  const [logoConfig, setLogoConfig] = useState<LogoConfig | null>(null);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [logoMessage, setLogoMessage] = useState("");
 
   useEffect(() => {
     const loadData = async () => {
-      const [profilData, statData] = await Promise.all([
+      const [profilData, statData, logoData] = await Promise.all([
         fetchProfilItems(),
-        fetchStatistik()
+        fetchStatistik(),
+        fetchLogoConfig(),
       ]);
       setSections(profilData);
       setStatistik(statData);
+      setLogoConfig(logoData);
     };
     void loadData();
   }, []);
+
+  const readFileAsDataUrl = (file: File): Promise<LogoConfig> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        resolve({
+          imageUrl: reader.result as string,
+          fileName: file.name,
+        });
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingLogo(true);
+    setLogoMessage("");
+
+    try {
+      let config: LogoConfig;
+      if (isCloudinaryConfigured("galeri")) {
+        try {
+          const res = await uploadImageToCloudinary(file, "galeri");
+          config = {
+            imageUrl: res.imageUrl,
+            imagePublicId: res.imagePublicId,
+            fileName: res.fileName || file.name,
+          };
+        } catch (err) {
+          console.warn("Cloudinary upload failed, using Data URL fallback:", err);
+          config = await readFileAsDataUrl(file);
+        }
+      } else {
+        config = await readFileAsDataUrl(file);
+      }
+
+      await updateLogoConfig(config);
+      setLogoConfig(config);
+      setLogoMessage("Logo berhasil diperbarui!");
+      setTimeout(() => setLogoMessage(""), 3500);
+    } catch (err) {
+      console.error("Gagal mengunggah logo:", err);
+      setLogoMessage("Gagal mengunggah logo.");
+    } finally {
+      setIsUploadingLogo(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleDeleteLogo = async () => {
+    setIsUploadingLogo(true);
+    setLogoMessage("");
+    try {
+      await deleteLogoConfig();
+      setLogoConfig(null);
+      setLogoMessage("Logo berhasil dihapus.");
+      setTimeout(() => setLogoMessage(""), 3500);
+    } catch (err) {
+      console.error("Gagal menghapus logo:", err);
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  };
 
   const handleSave = async (updatedItem: ProfilItem) => {
     try {
@@ -117,6 +198,84 @@ export default function ProfilSection({ items }: ProfilSectionProps) {
 
   return (
     <>
+      {/* Kustomisasi Logo Padukuhan */}
+      <div className="mb-8 rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold text-zinc-900">Kustomisasi Logo Padukuhan</h3>
+            <p className="mt-1 text-sm text-zinc-500">
+              Unggah logo kustom untuk memperbarui logo yang tampil di topbar &amp; header website.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-zinc-100 bg-[#f9fbf8] p-5">
+          <div className="flex items-center gap-4">
+            {logoConfig?.imageUrl ? (
+              <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-zinc-200 bg-white p-2 shadow-sm">
+                <img
+                  src={logoConfig.imageUrl}
+                  alt="Logo Padukuhan"
+                  className="h-full w-full object-contain"
+                />
+              </div>
+            ) : (
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#1f7a4a_0%,#39a86c_100%)] text-lg font-bold text-white shadow-sm">
+                PM
+              </div>
+            )}
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                PILIH FILE LOGO
+              </p>
+              <p className="text-sm font-medium text-zinc-800 mt-1">
+                {logoConfig?.fileName || (logoConfig?.imageUrl ? "Logo Kustom Aktif" : "Default (Teks Brand PM)")}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 shadow-sm disabled:opacity-60">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              {isUploadingLogo ? "Mengunggah..." : "Pilih File Logo"}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleLogoChange}
+                disabled={isUploadingLogo}
+                className="sr-only"
+              />
+            </label>
+
+            {logoConfig?.imageUrl && (
+              <button
+                type="button"
+                onClick={handleDeleteLogo}
+                disabled={isUploadingLogo}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-600 transition hover:bg-rose-100 disabled:opacity-60"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Hapus Logo
+              </button>
+            )}
+          </div>
+        </div>
+
+        {logoMessage && (
+          <p className="mt-3 text-sm font-medium text-emerald-600">
+            ✓ {logoMessage}
+          </p>
+        )}
+      </div>
       <div className={`grid gap-4 ${sections.length === 1 ? "grid-cols-1" : "md:grid-cols-2"}`}>
         {sections.map((item) => (
           <article

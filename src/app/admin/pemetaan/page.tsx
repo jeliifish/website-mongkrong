@@ -11,8 +11,9 @@ import {
   type LahanItem,
   type TanamanItem,
   defaultLahan,
-  defaultTanaman
+  defaultTanaman,
 } from "@/lib/lahan";
+import ModalPortal from "@/components/ModalPortal";
 import { isFirebaseConfigured } from "@/lib/firebase";
 import Button from "@/components/Button";
 
@@ -540,166 +541,170 @@ export default function AdminPemetaanPage() {
 
       {/* Modal Dialog */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm transition-opacity duration-300">
-          <div className="w-full max-w-lg rounded-3xl bg-white border border-zinc-200/80 shadow-2xl p-6 md:p-8 transform transition-all duration-300 scale-100 animate-scale-up">
-            <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
-              <h3 className="text-xl font-bold text-zinc-900">
-                {editingCrop ? `Edit Komoditas: ${editingCrop.name}` : "Tambah Komoditas Baru"}
-              </h3>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-zinc-400 hover:text-zinc-600 transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveModal} className="mt-6 space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">
-                  Nama Komoditas
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: Kedelai, Kacang Tanah"
-                  value={modalForm.name}
-                  onChange={(e) => setModalForm((prev) => ({ ...prev, name: e.target.value }))}
-                  className="h-11 w-full rounded-xl border border-zinc-200 px-3 text-sm text-zinc-900 outline-none focus:border-[#1f7a4a] focus:ring-2 focus:ring-[#1f7a4a]/10"
-                />
+        <ModalPortal>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm transition-opacity duration-300">
+            <div className="w-full max-w-lg rounded-3xl bg-white border border-zinc-200/80 shadow-2xl p-6 md:p-8 transform transition-all duration-300 scale-100 animate-scale-up">
+              <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+                <h3 className="text-xl font-bold text-zinc-900">
+                  {editingCrop ? `Edit Komoditas: ${editingCrop.name}` : "Tambah Komoditas Baru"}
+                </h3>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="text-zinc-400 hover:text-zinc-600 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <form onSubmit={handleSaveModal} className="mt-6 space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">
-                    Kategori Wilayah Lahan
-                  </label>
-                  <select
-                    value={modalForm.landCategoryId}
-                    onChange={(e) => setModalForm((prev) => ({ ...prev, landCategoryId: e.target.value }))}
-                    className="h-11 w-full rounded-xl border border-zinc-200 px-3 text-sm text-zinc-900 bg-white outline-none focus:border-[#1f7a4a] focus:ring-2 focus:ring-[#1f7a4a]/10"
-                  >
-                    {lahanItems.map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {item.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">
-                    Produktivitas (Ton/Ha)
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    required
-                    min="0"
-                    placeholder="Contoh: 3.5"
-                    value={modalForm.productivityPerHa}
-                    onChange={(e) => setModalForm((prev) => ({ ...prev, productivityPerHa: e.target.value }))}
-                    className="h-11 w-full rounded-xl border border-zinc-200 px-3 text-sm text-zinc-900 outline-none focus:border-[#1f7a4a] focus:ring-2 focus:ring-[#1f7a4a]/10"
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="block text-xs font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">
-                    Porsi Lahan / Faktor (%)
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    required
-                    min="0"
-                    max="100"
-                    placeholder="0 - 100"
-                    value={modalForm.landUsePct}
-                    onChange={(e) => setModalForm((prev) => ({ ...prev, landUsePct: e.target.value }))}
-                    className="h-11 w-full rounded-xl border border-zinc-200 px-3 text-sm text-zinc-900 outline-none focus:border-[#1f7a4a] focus:ring-2 focus:ring-[#1f7a4a]/10"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">
-                    Catatan Faktor / Koefisien
+                    Nama Komoditas
                   </label>
                   <input
                     type="text"
-                    placeholder="Contoh: Porsi Tanam Tegalan (30%)"
-                    value={modalForm.factorNotes}
-                    onChange={(e) => setModalForm((prev) => ({ ...prev, factorNotes: e.target.value }))}
+                    required
+                    placeholder="Contoh: Kedelai, Kacang Tanah"
+                    value={modalForm.name}
+                    onChange={(e) => setModalForm((prev) => ({ ...prev, name: e.target.value }))}
                     className="h-11 w-full rounded-xl border border-zinc-200 px-3 text-sm text-zinc-900 outline-none focus:border-[#1f7a4a] focus:ring-2 focus:ring-[#1f7a4a]/10"
                   />
                 </div>
-              </div>
 
-              <div className="mt-8 pt-4 border-t border-zinc-100 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="h-12 rounded-xl border border-zinc-200 bg-white px-5 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors duration-200"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting === "modal"}
-                  className="h-12 rounded-xl bg-[linear-gradient(135deg,#1f7a4a_0%,#2fa866_100%)] px-6 text-sm font-semibold text-white shadow-md hover:translate-y-[-1px] transition-all duration-200 disabled:opacity-50"
-                >
-                  {isSubmitting === "modal" ? "Menyimpan..." : "Simpan Komoditas"}
-                </button>
-              </div>
-            </form>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">
+                      Kategori Wilayah Lahan
+                    </label>
+                    <select
+                      value={modalForm.landCategoryId}
+                      onChange={(e) => setModalForm((prev) => ({ ...prev, landCategoryId: e.target.value }))}
+                      className="h-11 w-full rounded-xl border border-zinc-200 px-3 text-sm text-zinc-900 bg-white outline-none focus:border-[#1f7a4a] focus:ring-2 focus:ring-[#1f7a4a]/10"
+                    >
+                      {lahanItems.map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">
+                      Produktivitas (Ton/Ha)
+                    </label>
+                    <input
+                      type="number"
+                      step="any"
+                      required
+                      min="0"
+                      placeholder="Contoh: 3.5"
+                      value={modalForm.productivityPerHa}
+                      onChange={(e) => setModalForm((prev) => ({ ...prev, productivityPerHa: e.target.value }))}
+                      className="h-11 w-full rounded-xl border border-zinc-200 px-3 text-sm text-zinc-900 outline-none focus:border-[#1f7a4a] focus:ring-2 focus:ring-[#1f7a4a]/10"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">
+                      Porsi Lahan / Faktor (%)
+                    </label>
+                    <input
+                      type="number"
+                      step="any"
+                      required
+                      min="0"
+                      max="100"
+                      placeholder="0 - 100"
+                      value={modalForm.landUsePct}
+                      onChange={(e) => setModalForm((prev) => ({ ...prev, landUsePct: e.target.value }))}
+                      className="h-11 w-full rounded-xl border border-zinc-200 px-3 text-sm text-zinc-900 outline-none focus:border-[#1f7a4a] focus:ring-2 focus:ring-[#1f7a4a]/10"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-500 mb-1.5 uppercase tracking-wider">
+                      Catatan Faktor / Koefisien
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Contoh: Porsi Tanam Tegalan (30%)"
+                      value={modalForm.factorNotes}
+                      onChange={(e) => setModalForm((prev) => ({ ...prev, factorNotes: e.target.value }))}
+                      className="h-11 w-full rounded-xl border border-zinc-200 px-3 text-sm text-zinc-900 outline-none focus:border-[#1f7a4a] focus:ring-2 focus:ring-[#1f7a4a]/10"
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-8 pt-4 border-t border-zinc-100 flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="h-12 rounded-xl border border-zinc-200 bg-white px-5 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors duration-200"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting === "modal"}
+                    className="h-12 rounded-xl bg-[linear-gradient(135deg,#1f7a4a_0%,#2fa866_100%)] px-6 text-sm font-semibold text-white shadow-md hover:translate-y-[-1px] transition-all duration-200 disabled:opacity-50"
+                  >
+                    {isSubmitting === "modal" ? "Menyimpan..." : "Simpan Komoditas"}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
       {/* Delete Confirmation Modal */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm transition-opacity duration-300">
-          <div className="w-full max-w-md rounded-3xl bg-white border border-zinc-200/80 shadow-2xl p-6 md:p-8 transform transition-all duration-300 scale-100 animate-scale-up">
-            <div className="flex items-center gap-3 border-b border-zinc-100 pb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-rose-50 text-rose-600">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
+        <ModalPortal>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm transition-opacity duration-300">
+            <div className="w-full max-w-md rounded-3xl bg-white border border-zinc-200/80 shadow-2xl p-6 md:p-8 transform transition-all duration-300 scale-100 animate-scale-up">
+              <div className="flex items-center gap-3 border-b border-zinc-100 pb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-rose-50 text-rose-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-bold text-zinc-900">
+                  Hapus Komoditas
+                </h3>
               </div>
-              <h3 className="text-lg font-bold text-zinc-900">
-                Hapus Komoditas
-              </h3>
-            </div>
 
-            <div className="mt-4">
-              <p className="text-sm text-zinc-600 font-medium">
-                Apakah Anda yakin ingin menghapus komoditas <span className="font-extrabold text-zinc-950">“{deleteTarget.name}”</span>? Tindakan ini akan menghapus data dari database dan tidak dapat dibatalkan.
-              </p>
-            </div>
+              <div className="mt-4">
+                <p className="text-sm text-zinc-600 font-medium">
+                  Apakah Anda yakin ingin menghapus komoditas <span className="font-extrabold text-zinc-950">“{deleteTarget.name}”</span>? Tindakan ini akan menghapus data dari database dan tidak dapat dibatalkan.
+                </p>
+              </div>
 
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                type="button"
-                disabled={isSubmitting !== null}
-                onClick={() => setDeleteTarget(null)}
-                className="h-10 px-4 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors duration-200 disabled:opacity-50"
-              >
-                Batal
-              </button>
-              <button
-                type="button"
-                disabled={isSubmitting !== null}
-                onClick={confirmDeleteCrop}
-                className="h-10 px-5 rounded-xl bg-rose-600 hover:bg-rose-700 text-xs font-semibold text-white shadow-sm transition-colors duration-200 disabled:opacity-50"
-              >
-                {isSubmitting === `delete-${deleteTarget.id}` ? "Menghapus..." : "Ya, Hapus"}
-              </button>
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  type="button"
+                  disabled={isSubmitting !== null}
+                  onClick={() => setDeleteTarget(null)}
+                  className="h-10 px-4 rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors duration-200 disabled:opacity-50"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  disabled={isSubmitting !== null}
+                  onClick={confirmDeleteCrop}
+                  className="h-10 px-5 rounded-xl bg-rose-600 hover:bg-rose-700 text-xs font-semibold text-white shadow-sm transition-colors duration-200 disabled:opacity-50"
+                >
+                  {isSubmitting === `delete-${deleteTarget.id}` ? "Menghapus..." : "Ya, Hapus"}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
       {/* Toast Notifications */}

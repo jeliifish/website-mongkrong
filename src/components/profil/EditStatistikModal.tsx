@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import Button from "@/components/Button";
+import ModalPortal from "@/components/ModalPortal";
 import type { StatistikItem } from "@/types/statistik";
 
 type EditStatistikModalProps = {
@@ -42,15 +43,17 @@ export default function EditStatistikModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/45 p-6 backdrop-blur-[2px]">
-      <button
-        type="button"
-        aria-label="Tutup modal"
-        className="absolute inset-0 cursor-default"
-        onClick={onClose}
-      />
-      <EditStatistikForm key={item.id} item={item} onClose={onClose} onSave={onSave} />
-    </div>
+    <ModalPortal>
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-950/60 p-4 sm:p-6 backdrop-blur-sm">
+        <button
+          type="button"
+          aria-label="Tutup modal"
+          className="fixed inset-0 cursor-default"
+          onClick={onClose}
+        />
+        <EditStatistikForm key={item.id} item={item} onClose={onClose} onSave={onSave} />
+      </div>
+    </ModalPortal>
   );
 }
 

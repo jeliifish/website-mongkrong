@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import ModalPortal from "@/components/ModalPortal";
 import type { GaleriItem } from "@/types/galeri";
 
 type DetailGaleriModalProps = {
@@ -39,13 +40,14 @@ export default function DetailGaleriModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/45 p-6 backdrop-blur-[2px]">
-      <button
-        type="button"
-        aria-label="Tutup modal"
-        className="absolute inset-0 cursor-default"
-        onClick={onClose}
-      />
+    <ModalPortal>
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-950/60 p-4 sm:p-6 backdrop-blur-sm">
+        <button
+          type="button"
+          aria-label="Tutup modal"
+          className="fixed inset-0 cursor-default"
+          onClick={onClose}
+        />
 
       <div className="relative z-10 w-full max-w-4xl overflow-hidden border border-zinc-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
         <div className="grid lg:grid-cols-[minmax(0,1.35fr)_22rem]">
@@ -114,5 +116,6 @@ export default function DetailGaleriModal({
         </div>
       </div>
     </div>
+  </ModalPortal>
   );
 }

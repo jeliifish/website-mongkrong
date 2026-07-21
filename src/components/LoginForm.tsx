@@ -37,6 +37,7 @@ export default function LoginForm() {
   const { user, loading, isConfigured } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -89,16 +90,35 @@ export default function LoginForm() {
             onChange={(event) => setEmail(event.target.value)}
             className="h-14 w-full rounded-2xl border border-zinc-200 px-5 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-[#1f7a4a] focus:ring-4 focus:ring-[#1f7a4a]/10"
           />
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            placeholder="Masukkan kata sandi"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            className="h-14 w-full rounded-2xl border border-zinc-200 px-5 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-[#1f7a4a] focus:ring-4 focus:ring-[#1f7a4a]/10"
-          />
+          <div className="relative">
+            <input
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              placeholder="Masukkan kata sandi"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              className="h-14 w-full rounded-2xl border border-zinc-200 pl-5 pr-12 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-[#1f7a4a] focus:ring-4 focus:ring-[#1f7a4a]/10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition cursor-pointer p-1"
+              aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+            >
+              {showPassword ? (
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858-5.908a9.98 9.98 0 014.122-.963c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21f-3.95-3.95M3 3l18 18" />
+                </svg>
+              ) : (
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              )}
+            </button>
+          </div>
         </div>
 
         {errorMessage ? (

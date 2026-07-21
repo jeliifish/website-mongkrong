@@ -37,7 +37,6 @@ export default function Home() {
       <main>
         <section className="relative min-h-screen overflow-hidden bg-[#223127] text-white">
           <HeroCarousel />
-          <Header />
 
           <div className="relative z-[3] mx-auto flex min-h-screen max-w-7xl items-center justify-center px-4 pb-24 pt-36 text-center sm:px-6 lg:px-8">
             <div className="max-w-4xl">

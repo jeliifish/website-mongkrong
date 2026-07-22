@@ -41,7 +41,7 @@ export default function AdminOverviewPanel() {
           return;
         }
 
-        setBeritaCount(beritaItems.length);
+        setBeritaCount(beritaItems.filter((b) => b.status !== "Draft").length);
         setGaleriCount(galeriItems.length);
         setUmkmCount(umkmItems.length);
         setUserCount(adminItems.length);

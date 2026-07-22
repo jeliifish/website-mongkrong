@@ -27,6 +27,7 @@ type BeritaDocument = {
   imageUrl?: string;
   imagePublicId?: string;
   fileName?: string;
+  status?: string;
   createdAt?: number;
   updatedAt?: number;
 };
@@ -54,6 +55,7 @@ function toBeritaItem(id: string, data: BeritaDocument): BeritaItem {
     imageUrl: data.imageUrl?.trim() || undefined,
     imagePublicId: data.imagePublicId?.trim() || undefined,
     fileName: data.fileName?.trim() || undefined,
+    status: (data.status as "Published" | "Draft") ?? "Published",
   };
 }
 
@@ -78,6 +80,7 @@ function toBeritaPayload(input: NewBeritaInput | BeritaItem) {
     imageUrl: input.imageUrl?.trim() || "",
     imagePublicId: input.imagePublicId?.trim() || "",
     fileName: input.fileName?.trim() || "",
+    status: input.status ?? "Published",
     updatedAt: Date.now(),
   };
 }

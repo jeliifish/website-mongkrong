@@ -15,7 +15,9 @@ export default function HomeBeritaPreview({
   fallbackItems,
 }: HomeBeritaPreviewProps) {
   const [items, setItems] = useState<BeritaItem[]>(() =>
-    isFirebaseConfigured ? [] : fallbackItems.slice(0, 3),
+    isFirebaseConfigured
+      ? []
+      : fallbackItems.filter((item) => item.status !== "Draft").slice(0, 3),
   );
   const [isLoading, setIsLoading] = useState(() => isFirebaseConfigured);
   const [syncError, setSyncError] = useState<string | null>(null);
@@ -37,11 +39,11 @@ export default function HomeBeritaPreview({
           return;
         }
 
-        setItems(remoteItems.slice(0, 3));
+        setItems(remoteItems.filter((item) => item.status !== "Draft").slice(0, 3));
         setSyncError(null);
       } catch {
         if (!isCancelled) {
-          setItems(fallbackItems.slice(0, 3));
+          setItems(fallbackItems.filter((item) => item.status !== "Draft").slice(0, 3));
           setSyncError(
             "Preview berita dari Firebase belum bisa dimuat. Menampilkan data cadangan.",
           );

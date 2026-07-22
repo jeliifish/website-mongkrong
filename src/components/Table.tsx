@@ -69,57 +69,59 @@ export default function Table({
               {row.cells.map((cell, index) => (
                 <div key={`${row.id}-${index}`}>{cell}</div>
               ))}
-              <div className="flex justify-end">
-                <details className="group relative">
-                  <summary className="flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-900">
-                    <span className="sr-only">Buka aksi</span>
-                    <span className="flex items-center gap-1">
-                      <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                      <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                      <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                    </span>
-                  </summary>
+              {row.actions && row.actions.length > 0 && (
+                <div className="flex justify-end">
+                  <details className="group relative">
+                    <summary className="flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-900">
+                      <span className="sr-only">Buka aksi</span>
+                      <span className="flex items-center gap-1">
+                        <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                      </span>
+                    </summary>
 
-                  <div className="absolute right-0 top-12 z-10 min-w-40 overflow-hidden border border-zinc-200 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.12)]">
-                    {(row.actions ?? []).map((action) =>
-                      action.href ? (
-                        <Link
-                          key={action.label}
-                          href={action.href}
-                          className={`block px-4 py-3 text-sm transition ${
-                            action.tone === "danger"
-                              ? "text-rose-600 hover:bg-rose-50"
-                              : "text-zinc-700 hover:bg-zinc-50"
-                          }`}
-                        >
-                          {action.label}
-                        </Link>
-                      ) : (
-                        <button
-                          key={action.label}
-                          type="button"
-                          disabled={action.disabled}
-                          onClick={(event) => {
-                            event.currentTarget
-                              .closest("details")
-                              ?.removeAttribute("open");
-                            action.onClick?.();
-                          }}
-                          className={`block w-full px-4 py-3 text-left text-sm transition ${
-                            action.disabled
-                              ? "cursor-not-allowed text-zinc-400"
-                              : action.tone === "danger"
+                    <div className="absolute right-0 top-12 z-10 min-w-40 overflow-hidden border border-zinc-200 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.12)]">
+                      {row.actions.map((action) =>
+                        action.href ? (
+                          <Link
+                            key={action.label}
+                            href={action.href}
+                            className={`block px-4 py-3 text-sm transition ${
+                              action.tone === "danger"
                                 ? "text-rose-600 hover:bg-rose-50"
                                 : "text-zinc-700 hover:bg-zinc-50"
-                          }`}
-                        >
-                          {action.label}
-                        </button>
-                      ),
-                    )}
-                  </div>
-                </details>
-              </div>
+                            }`}
+                          >
+                            {action.label}
+                          </Link>
+                        ) : (
+                          <button
+                            key={action.label}
+                            type="button"
+                            disabled={action.disabled}
+                            onClick={(event) => {
+                              event.currentTarget
+                                .closest("details")
+                                ?.removeAttribute("open");
+                              action.onClick?.();
+                            }}
+                            className={`block w-full px-4 py-3 text-left text-sm transition ${
+                              action.disabled
+                                ? "cursor-not-allowed text-zinc-400"
+                                : action.tone === "danger"
+                                  ? "text-rose-600 hover:bg-rose-50"
+                                  : "text-zinc-700 hover:bg-zinc-50"
+                            }`}
+                          >
+                            {action.label}
+                          </button>
+                        ),
+                      )}
+                    </div>
+                  </details>
+                </div>
+              )}
             </div>
           ))
         )}

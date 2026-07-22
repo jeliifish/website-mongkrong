@@ -14,7 +14,7 @@ export default function PublicBeritaGrid({
   fallbackItems,
 }: PublicBeritaGridProps) {
   const [items, setItems] = useState<BeritaItem[]>(() =>
-    isFirebaseConfigured ? [] : fallbackItems,
+    isFirebaseConfigured ? [] : fallbackItems.filter((item) => item.status !== "Draft"),
   );
   const [isLoading, setIsLoading] = useState(() => isFirebaseConfigured);
   const [syncError, setSyncError] = useState<string | null>(null);
@@ -36,11 +36,11 @@ export default function PublicBeritaGrid({
           return;
         }
 
-        setItems(remoteItems);
+        setItems(remoteItems.filter((item) => item.status !== "Draft"));
         setSyncError(null);
       } catch {
         if (!isCancelled) {
-          setItems(fallbackItems);
+          setItems(fallbackItems.filter((item) => item.status !== "Draft"));
           setSyncError(
             "Berita dari Firebase belum bisa dimuat. Sementara menampilkan data cadangan.",
           );

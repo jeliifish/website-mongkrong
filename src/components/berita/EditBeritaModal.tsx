@@ -84,7 +84,7 @@ function EditBeritaForm({
     return `<p>${berita.description}</p>`;
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isPublished, setIsPublished] = useState(true);
+  const [isPublished, setIsPublished] = useState(berita.status === "Published");
 
   // Auto-generate slug when title changes
   useEffect(() => {
@@ -131,6 +131,7 @@ function EditBeritaForm({
       description,
       content: paragraphs.length > 0 ? paragraphs : [contentHtml],
       file: selectedFile,
+      status: isPublished ? "Published" : "Draft",
     });
     onClose();
   };

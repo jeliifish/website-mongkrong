@@ -15,9 +15,12 @@ export default function PublicBeritaDetail({
   id,
   fallbackItem,
 }: PublicBeritaDetailProps) {
-  const [item, setItem] = useState<BeritaItem | null>(() =>
-    isFirebaseConfigured ? null : fallbackItem,
-  );
+  const [item, setItem] = useState<BeritaItem | null>(() => {
+    if (!isFirebaseConfigured && fallbackItem && fallbackItem.status === "Draft") {
+      return null;
+    }
+    return isFirebaseConfigured ? null : fallbackItem;
+  });
   const [isLoading, setIsLoading] = useState(() => isFirebaseConfigured);
   const [syncError, setSyncError] = useState<string | null>(null);
 
@@ -38,10 +41,15 @@ export default function PublicBeritaDetail({
           return;
         }
 
-        setItem(remoteItem ?? fallbackItem);
+        if (remoteItem && remoteItem.status === "Draft") {
+          setItem(null);
+        } else {
+          setItem(remoteItem ?? (fallbackItem && fallbackItem.status !== "Draft" ? fallbackItem : null));
+        }
         setSyncError(null);
       } catch {
         if (!isCancelled) {
+          setItem(fallbackItem && fallbackItem.status !== "Draft" ? fallbackItem : null);
           setSyncError(
             "Detail berita dari Firebase belum bisa dimuat. Menampilkan data yang tersedia.",
           );
@@ -147,14 +155,26 @@ export default function PublicBeritaDetail({
         <section className="mt-8">
           <article className="rounded-[2rem] border border-zinc-200 bg-white px-8 py-8 shadow-sm sm:px-10">
             <div className="space-y-6">
-              {visibleContent.map((paragraph, index) => (
-                <p
-                  key={`${item.id}-paragraph-${index}`}
-                  className="text-base leading-8 text-zinc-700"
-                >
-                  {paragraph}
-                </p>
-              ))}
+              {visibleContent.map((paragraph, index) => {
+                const hasHtml = /<[a-z][\s\S]*>/i.test(paragraph);
+                if (hasHtml) {
+                  return (
+                    <div
+                      key={`${item.id}-paragraph-${index}`}
+                      className="text-base leading-8 text-zinc-700 [&>p]:mb-4"
+                      dangerouslySetInnerHTML={{ __html: paragraph }}
+                    />
+                  );
+                }
+                return (
+                  <p
+                    key={`${item.id}-paragraph-${index}`}
+                    className="text-base leading-8 text-zinc-700"
+                  >
+                    {paragraph}
+                  </p>
+                );
+              })}
             </div>
           </article>
         </section>

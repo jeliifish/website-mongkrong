@@ -40,7 +40,7 @@ export default function DetailBeritaModal({
   }
 
   const visibleContent = berita.content.filter(
-    (paragraph) => paragraph.trim().length > 0 && !isDuplicateSummary(paragraph, berita.description),
+    (paragraph) => paragraph.trim().length > 0,
   );
 
   return (
@@ -57,20 +57,13 @@ export default function DetailBeritaModal({
         <div className="border-b border-zinc-200 px-8 py-6">
           <div className="flex items-start justify-between gap-6">
             <div className="space-y-4">
-              <div className="flex flex-wrap items-center gap-3 text-sm">
-                <span className="rounded-full bg-emerald-50 px-3 py-1 font-medium text-emerald-700">
-                  {berita.category}
-                </span>
-                <span className="text-zinc-400">&middot;</span>
-                <span className="text-zinc-500">{berita.date}</span>
+              <div className="text-sm text-zinc-500">
+                {berita.date}
               </div>
               <div className="space-y-3">
                 <h2 className="text-3xl font-semibold tracking-tight text-zinc-950">
                   {berita.title}
                 </h2>
-                <p className="max-w-2xl text-base leading-8 text-zinc-600">
-                  {berita.description}
-                </p>
               </div>
             </div>
 
@@ -96,55 +89,39 @@ export default function DetailBeritaModal({
           </div>
         </div>
 
-        <div
-          className={`px-8 py-7 max-h-[60vh] overflow-y-auto ${
-            visibleContent.length > 0
-              ? "grid gap-8 lg:grid-cols-[minmax(0,1fr)_16rem]"
-              : "border-t border-zinc-200"
-          }`}
-        >
+        <div className="px-8 py-7 max-h-[60vh] overflow-y-auto border-t border-zinc-200">
           <div className="space-y-5">
             {berita.imageUrl && (
               <div
-                className="h-64 rounded-2xl bg-cover bg-center mb-6"
+                className="h-80 md:h-[26rem] rounded-2xl bg-cover bg-center mb-6 w-full"
                 style={{ backgroundImage: `url(${berita.imageUrl})` }}
               />
             )}
             {visibleContent.length > 0 && (
               <div className="space-y-5">
-                {visibleContent.map((paragraph, index) => (
-                  <p
-                    key={`${berita.title}-paragraph-${index}`}
-                    className="text-[1.02rem] leading-8 text-zinc-700"
-                  >
-                    {paragraph}
-                  </p>
-                ))}
+                {visibleContent.map((paragraph, index) => {
+                  const hasHtml = /<[a-z][\s\S]*>/i.test(paragraph);
+                  if (hasHtml) {
+                    return (
+                      <div
+                        key={`${berita.title}-paragraph-${index}`}
+                        className="text-[1.02rem] leading-8 text-zinc-700 [&>p]:mb-4"
+                        dangerouslySetInnerHTML={{ __html: paragraph }}
+                      />
+                    );
+                  }
+                  return (
+                    <p
+                      key={`${berita.title}-paragraph-${index}`}
+                      className="text-[1.02rem] leading-8 text-zinc-700"
+                    >
+                      {paragraph}
+                    </p>
+                  );
+                })}
               </div>
             )}
           </div>
-
-          <aside
-            className={`grid gap-5 h-fit ${
-              visibleContent.length > 0
-                ? "border-t border-zinc-200 pt-6 lg:border-t-0 lg:border-l lg:pl-8 lg:pt-0"
-                : "sm:grid-cols-2"
-            }`}
-          >
-            <div>
-              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-zinc-500">
-                Penulis
-              </p>
-              <p className="mt-2 text-sm font-medium text-zinc-900">{berita.author}</p>
-            </div>
-
-            <div>
-              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-zinc-500">
-                Tanggal Publikasi
-              </p>
-              <p className="mt-2 text-sm font-medium text-zinc-900">{berita.date}</p>
-            </div>
-          </aside>
         </div>
       </div>
     </div>

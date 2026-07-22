@@ -67,7 +67,7 @@ export default function HomeHighlights({
         if (!isCancelled) {
           setCards(
             createHighlightCards({
-              beritaCount: beritaItems.length,
+              beritaCount: beritaItems.filter((item) => item.status !== "Draft").length,
               galeriCount: galeriItems.length,
               umkmCount: umkmItems.length,
             }),

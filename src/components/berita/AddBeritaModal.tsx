@@ -12,6 +12,7 @@ type NewBerita = {
   category: string;
   content: string[];
   file: File | null;
+  status?: "Published" | "Draft";
 };
 
 type AddBeritaModalProps = {
@@ -130,6 +131,7 @@ function AddBeritaForm({
       category: "Informasi Desa",
       content: paragraphs.length > 0 ? paragraphs : [contentHtml],
       file: selectedFile,
+      status: isPublished ? "Published" : "Draft",
     });
     onClose();
   };

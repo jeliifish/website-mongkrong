@@ -18,7 +18,7 @@ export async function generateMetadata({
 
   try {
     const item = await fetchBeritaItemById(id);
-    if (item) {
+    if (item && item.status !== "Draft") {
       return {
         title: item.title,
         description: item.description || (item.content?.[0] || "").substring(0, 160),

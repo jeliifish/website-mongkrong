@@ -9,6 +9,7 @@ export type BeritaItem = {
   imageUrl?: string;
   imagePublicId?: string;
   fileName?: string;
+  status?: "Published" | "Draft";
 };
 
 export type NewBeritaInput = {
@@ -20,4 +21,5 @@ export type NewBeritaInput = {
   imageUrl?: string;
   imagePublicId?: string;
   fileName?: string;
+  status?: "Published" | "Draft";
 };

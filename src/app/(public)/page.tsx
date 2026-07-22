@@ -42,7 +42,8 @@ export default function Home() {
             <div className="max-w-4xl">
               <ScrollReveal animation="fade-down" duration={900} distance={30}>
                 <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-6xl md:text-7xl">
-                  Selamat Datang di <span className="text-emerald-400">Dusun Mongkrong</span>
+                  Selamat Datang <br />
+                  di <span className="text-emerald-400">Dusun Mongkrong</span>
                 </h1>
               </ScrollReveal>
               <ScrollReveal animation="fade-up" delay={300} duration={800}>

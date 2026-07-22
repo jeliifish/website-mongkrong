@@ -240,11 +240,10 @@ export default function AdminPenggunaPage() {
         <div key="email-role">
           <p className="text-zinc-500 text-xs">{admin.email}</p>
           <span
-            className={`inline-block mt-1 text-[0.65rem] font-bold uppercase px-2 py-0.5 rounded-full ${
-              admin.role === "Super Admin"
-                ? "bg-emerald-100 text-emerald-800"
-                : "bg-zinc-100 text-zinc-700"
-            }`}
+            className={`inline-block mt-1 text-[0.65rem] font-bold uppercase px-2 py-0.5 rounded-full ${admin.role === "Super Admin"
+              ? "bg-emerald-100 text-emerald-800"
+              : "bg-zinc-100 text-zinc-700"
+              }`}
           >
             {admin.role}
           </span>
@@ -256,11 +255,10 @@ export default function AdminPenggunaPage() {
             activePerms.map((perm) => (
               <span
                 key={perm}
-                className={`text-xs px-2 py-0.5 rounded border ${
-                  admin.role === "Super Admin"
-                    ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-                    : "bg-zinc-50 text-zinc-600 border-zinc-100"
-                }`}
+                className={`text-xs px-2 py-0.5 rounded border ${admin.role === "Super Admin"
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                  : "bg-zinc-50 text-zinc-600 border-zinc-100"
+                  }`}
               >
                 {perm}
               </span>
@@ -286,8 +284,6 @@ export default function AdminPenggunaPage() {
 
   return (
     <div className="space-y-6">
-      {/* Form Tambah/Edit Admin */}
-
       {/* Form Tambah/Edit Admin */}
       {showForm && (
         <section className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
@@ -373,13 +369,12 @@ export default function AdminPenggunaPage() {
                 <div className="mt-2 grid gap-3 sm:grid-cols-2">
                   {/* Kelola Profil Desa */}
                   <label
-                    className={`flex items-center gap-3 rounded-xl border border-zinc-200 p-3.5 text-sm font-semibold select-none cursor-pointer transition ${
-                      role === "Super Admin"
-                        ? "bg-zinc-50 border-zinc-200 text-zinc-400 cursor-not-allowed"
-                        : permissions.profil
-                          ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-                          : "bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50"
-                    }`}
+                    className={`flex items-center gap-3 rounded-xl border border-zinc-200 p-3.5 text-sm font-semibold select-none cursor-pointer transition ${role === "Super Admin"
+                      ? "bg-zinc-50 border-zinc-200 text-zinc-400 cursor-not-allowed"
+                      : permissions.profil
+                        ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                        : "bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+                      }`}
                   >
                     <input
                       type="checkbox"
@@ -393,13 +388,12 @@ export default function AdminPenggunaPage() {
 
                   {/* Kelola Galeri */}
                   <label
-                    className={`flex items-center gap-3 rounded-xl border border-zinc-200 p-3.5 text-sm font-semibold select-none cursor-pointer transition ${
-                      role === "Super Admin"
-                        ? "bg-zinc-50 border-zinc-200 text-zinc-400 cursor-not-allowed"
-                        : permissions.galeri
-                          ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-                          : "bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50"
-                    }`}
+                    className={`flex items-center gap-3 rounded-xl border border-zinc-200 p-3.5 text-sm font-semibold select-none cursor-pointer transition ${role === "Super Admin"
+                      ? "bg-zinc-50 border-zinc-200 text-zinc-400 cursor-not-allowed"
+                      : permissions.galeri
+                        ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                        : "bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+                      }`}
                   >
                     <input
                       type="checkbox"
@@ -413,13 +407,12 @@ export default function AdminPenggunaPage() {
 
                   {/* Kelola UMKM */}
                   <label
-                    className={`flex items-center gap-3 rounded-xl border border-zinc-200 p-3.5 text-sm font-semibold select-none cursor-pointer transition ${
-                      role === "Super Admin"
-                        ? "bg-zinc-50 border-zinc-200 text-zinc-400 cursor-not-allowed"
-                        : permissions.umkm
-                          ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-                          : "bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50"
-                    }`}
+                    className={`flex items-center gap-3 rounded-xl border border-zinc-200 p-3.5 text-sm font-semibold select-none cursor-pointer transition ${role === "Super Admin"
+                      ? "bg-zinc-50 border-zinc-200 text-zinc-400 cursor-not-allowed"
+                      : permissions.umkm
+                        ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                        : "bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+                      }`}
                   >
                     <input
                       type="checkbox"
@@ -433,13 +426,12 @@ export default function AdminPenggunaPage() {
 
                   {/* Kelola Berita */}
                   <label
-                    className={`flex items-center gap-3 rounded-xl border border-zinc-200 p-3.5 text-sm font-semibold select-none cursor-pointer transition ${
-                      role === "Super Admin"
-                        ? "bg-zinc-50 border-zinc-200 text-zinc-400 cursor-not-allowed"
-                        : permissions.berita
-                          ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-                          : "bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50"
-                    }`}
+                    className={`flex items-center gap-3 rounded-xl border border-zinc-200 p-3.5 text-sm font-semibold select-none cursor-pointer transition ${role === "Super Admin"
+                      ? "bg-zinc-50 border-zinc-200 text-zinc-400 cursor-not-allowed"
+                      : permissions.berita
+                        ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                        : "bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+                      }`}
                   >
                     <input
                       type="checkbox"
